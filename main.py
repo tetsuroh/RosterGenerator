@@ -1,8 +1,7 @@
-from rg.roster.work import Work
-from rg.roster.shift import Shift
-from rg.roster.roster import Roster
-from rg.roster.employee import Employee
+from rg import *
 
+from rg.util import random_roster
+from rg.util import roster2csv
 
 def main():
     # init employee
@@ -44,12 +43,27 @@ def main():
     for i in range(20):
         rosters.append(Roster([Shift(daysOfTheMonth, employee) for employee in employees]))
 
-    rosters
-
+    csv = roster2csv.convert(random_roster.randomize(rosters[0]))
+    with open("roster.csv", mode="w", encoding="utf-8") as filep:
+        filep.write(csv)
     '''
     rostersに対してランダムにあれこれしたりしてほげほげする。
     Date関連と乱数関連のことを調べての頃のとこを実装スべし。
     '''
+
+def sort_rosters(rosters):
+    if not rosters:
+        return []
+    else:
+        head = rosters.pop(0)
+        head_problems = check(head)
+        return [r for r in rosters if check(r) <= head_problems] + \
+            [head] + \
+            [r for r in rosters if check(r) > head_problems]
+
+def check(roster):
+    problem = 0
+    return problem
 
 if __name__ == '__main__':
     main()
