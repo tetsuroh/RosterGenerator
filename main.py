@@ -61,6 +61,19 @@ def sort_rosters(rosters):
             [head] + \
             [r for r in rosters if check(r) > head_problems]
 
+class RosterChecker:
+    def __init__(self):
+        pass
+
+    def check(self, roster):
+        problems = 0
+        problems += self.check_day(roster)
+        problems += self.check_holiday(roster)
+        return problems
+
+    
+    def check_day_on()
+
 def check(roster):
     problem = 0
     return problem
