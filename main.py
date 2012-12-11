@@ -5,45 +5,39 @@ from rg.util import roster2csv
 
 def main():
     # init employee
+    # シフトの種類とその内容
     works = {
         "常勤": ["A", "B", "2", "C", "休"],
         "パート2": ["2", "休"],
         "パートB": ["B", "休"], 
-        "パート3": ["出", "休"],
-        "早番": ["出", "休"],
-        "遅番": ["出", "休"],
+        "パート3": ["出", "休"]
         }
 
-    daysOfTheMonth = 30;
-    
+    # その月の最後の日
+    lastday_of_the_month = 31
+
+    # 従業員登録
     employees = [
-        Employee(*param) for param in [
+        Employee(name, status) for (name, status)in [
             ("サイトウ", "常勤"),
             ("モリ", "常勤"),
             ("マスジマ", "常勤"),
             ("ソンダ", "常勤"),
             ("ヤマモト", "パート2"),
             ("サトウ", "パートB"),
-            ("コンノ", "パートB"),
-            ("イチヤナギ", "パート3"),
-            ("ナガシマ", "早番"),
-            ("スドウ", "早番"),
-            ("ホリキリ", "早番"),
-            ("ハヤシ", "遅番"),
-            ("キクチ", "遅番"),
-            ("シモニシ", "遅番"),
-            ]]
+            ("コンノ", "パートB")
+            ]
+        ]
     
-
+    # 従業員のシフト内容を設定
     for employee in employees:
-        employee.set_works(works[employee.status()])
-    print (employees)
+        employee.works = works[employee.status]
 
     rosters = []
     for i in range(20):
-        rosters.append(Roster([Shift(daysOfTheMonth, employee) for employee in employees]))
+        rosters.append(Roster(lastday_of_the_month, employees))
 
-    csv = roster2csv.convert(random_roster.randomize(rosters[0]))
+    csv = roster2csv.convert(rosters[0])
     with open("roster.csv", mode="w", encoding="utf-8") as filep:
         filep.write(csv)
     '''
@@ -72,7 +66,8 @@ class RosterChecker:
         return problems
 
     
-    def check_day_on()
+    def check_day_on():
+        pass
 
 def check(roster):
     problem = 0

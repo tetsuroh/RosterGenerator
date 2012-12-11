@@ -1,7 +1,6 @@
 *~
-rg/*
 __pycache__/*
-rg
 *.pyc
 #*#
 *.pyw
+.*
