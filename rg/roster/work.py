@@ -16,8 +16,8 @@ class Work:
         self.locked = locked
 
     def __str__(self):
-        locked = " Locked " if self.locked() else "Unlocked"
-        return "(%s, %s)" % (self.work(), locked)
+        locked = " Locked " if self.locked else "Unlocked"
+        return "(%s, %s)" % (self.work, locked)
 
     def __repr__(self):
         return str(self)

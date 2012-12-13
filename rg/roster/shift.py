@@ -1,11 +1,7 @@
 import collections
 
-try:
-    from .work import Work
-    from .employee import Employee
-except ValueError:
-    from work import Work
-    from employee import Employee
+from .work import Work
+from .employee import Employee
     
 class Shift(collections.MutableSequence):
     def __init__(self, lastday, employee):
@@ -22,11 +18,11 @@ class Shift(collections.MutableSequence):
         'tom'
         '''
         self._shift = []
-        self.lastday_of_the_month = lastday
+        self.lastday = lastday
         work = ''
         if len(employee.works):
             work = employee.works[0]
-        for i in range(self.lastday_of_the_month):
+        for i in range(self.lastday):
             self._shift.append(Work(work))
 
         self.employee = employee
