@@ -1,26 +1,29 @@
 import collections
+import random
 
-try:
-    from .work import Work
-    from .shift import Shift
-    from .employee import Employee
-except ValueError:
-    from work import Work
-    from shift import Shift
-    from employee import Employee
+from .work import Work
+from .shift import Shift
+from .employee import Employee
+from ..util.flip import flip
 
 class Roster(collections.MutableSequence):
     def __init__(self, lastday, employees):
         '''
-        >>> roster = Roster(31, [Employee("tom", "part", ("A", "B"))])
-        >>> roster[0][0].set_work('A').work()
+        >>> employees = []
+        >>> employees.append(Employee('Tom', 'Part', ["A", "B"]))
+        >>> employees.append(Employee('Mike', 'Part', ["A", "B", "C"]))
+        >>> roster = Roster(31, employees)
+        >>> roster[0][0].work
         'A'
-        >>> roster.lastday_of_the_month
-        31
+        >>> roster2 = roster.clone()
+        >>> roster == roster2
+        False
+        >>> roster.employees[0] == roster2.employees[0]
+        True
         '''
         self.employees = employees
         self._roster = []
-        self.lastday_of_the_month = lastday
+        self.lastday = lastday
         self.extend([])
         for e in employees:
             self.append(Shift(lastday, e))
@@ -63,8 +66,11 @@ class Roster(collections.MutableSequence):
             raise ValueError()
 
     def clone(self):
-        roster = Roster(self.ro)
-        roster.append(Shift())
+        roster = Roster(self.lastday, self.employees)
+        for (cshift, pshift) in zip(roster, self):
+            for (cday, pday) in zip(cshift, pshift):
+                cday.work = pday.work
+        return roster
 
     def works_on(self, day):
         return [shift.work_on(day) for shift in self._roster]
