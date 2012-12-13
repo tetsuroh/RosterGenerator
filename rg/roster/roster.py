@@ -65,6 +65,15 @@ class Roster(collections.MutableSequence):
         else:
             raise ValueError()
 
+    def cross_over(self, other):
+        child = Roster(self.lastday, self.employees)
+        for i in range(len(self)):
+            for j in range(len(self[i])):
+                if not fday.locked:
+                    child[i][j].work = self[i][j].work if flip(0.5) \
+                        else other[i][j].work
+        return child
+
     def clone(self):
         roster = Roster(self.lastday, self.employees)
         for (cshift, pshift) in zip(roster, self):
