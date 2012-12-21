@@ -1,17 +1,19 @@
 from rg import *
+import json
 
-from rg.util import random_roster
-from rg.util import roster2csv
+def load_setting(path, filename, encoding="utf-8"):
+    with open(path + filename, "r", encoding=encoding) as fp:
+        return json.load(fp)
+
+def save_setting(obj, path, filenmae, encoding="utf-8"):
+    with open(path + filename, "w", encoding=encoding) as fp:
+        fp.write(json.dumps(obj, indent=2, ensure_ascii=False))
+
 
 def main():
     # init employee
     # シフトの種類とその内容
-    works = {
-        "常勤": ["A", "B", "2", "C", "休"],
-        "パート2": ["2", "休"],
-        "パートB": ["B", "休"], 
-        "パート3": ["出", "休"]
-        }
+    works = load_setting("./settings/sunhome_kitchen/", "works.json")
 
     # その月の最後の日
     lastday_of_the_month = 31
@@ -37,9 +39,10 @@ def main():
     for i in range(20):
         rosters.append(Roster(lastday_of_the_month, employees))
 
-    csv = roster2csv.convert(rosters[0])
+    csv = convert(randomize(rosters[0]))
     with open("roster.csv", mode="w", encoding="utf-8") as filep:
         filep.write(csv)
+    print("complete")
     '''
     rostersに対してランダムにあれこれしたりしてほげほげする。
     Date関連と乱数関連のことを調べての頃のとこを実装スべし。
