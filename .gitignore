@@ -5,3 +5,5 @@ __pycache__/*
 *.pyw
 .*
 roster.csv
+settings/*
+settings
