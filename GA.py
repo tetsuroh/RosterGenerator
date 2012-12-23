@@ -1,5 +1,27 @@
 import random
 
+class Entity:
+    def __init__(self,
+                 gene,
+                 cRate,
+                 mRate,
+                 cParam,
+                 mParam
+                 ):
+        self.gene                = gene
+        self.crossover_rate      = cRate
+        self.mutaion_rate        = mRate
+        self.crossover_parameter = cParam
+        self.mutaion_parameter   = mParam
+
+        self.fitness = None
+
+    def isPerfect(self):
+        pass
+
+    def mutation(self):
+        pass
+        
 
 def rand(max, min=0):
     return int(random.random() * (max - min) + min)
@@ -26,6 +48,7 @@ class GA:
         
         self.initialize_population()
         self.entities = []
+        self.next_generation = []
         self.generation = 1
         self.log = []
 
@@ -46,3 +69,18 @@ class GA:
             fst = i if i < fst else fst
             snd = i if i > fst and i < snd else snd
         return (self.entities[fst], self.entities[snd])
+    
+    def perform_archive(self):
+        self.next_generation = self.entities[:self.archive_size]
+        return self
+
+    def evolve_verbose(self):
+        self.next_generation = []
+        self.generation += 1
+        self.calc_fitness()
+        self.sort_entities()
+
+        if (self.entities[0].isPerfect()):
+            return self.entities[0]
+        else:
+            self.evolve()
