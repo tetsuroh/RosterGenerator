@@ -7,3 +7,4 @@ __pycache__/*
 roster.csv
 settings/*
 settings
+*_flymake*
