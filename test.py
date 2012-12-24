@@ -1,7 +1,8 @@
 import unittest
 
-from rg import util
+# pyflakes.ignore
 from rg import *
+
 
 class test_util(unittest.TestCase):
     def test_flip(self):
