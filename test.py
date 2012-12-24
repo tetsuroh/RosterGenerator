@@ -3,13 +3,32 @@ import unittest
 # pyflakes.ignore
 from rg import *
 
+class test_ga(unittest.TestCase):
+    def test_entity(self):
+        es = []
+        es.append(Entity([], 0.1, 0.1))
+        es.append(Entity([], 0.1, 0.1))
+        for e in es:
+            e.fitness = 1
+        self.assertTrue(es[0] == es[1])
+        self.assertTrue(es[0] >= es[1])
+        self.assertTrue(es[0] <= es[1])
+        self.assertFalse(es[0] != es[1])
+
+        es[0].fitness = 2
+
+        self.assertTrue(es[0] >= es[1])
+        self.assertFalse(es[0] <= es[1])
+        self.assertTrue(es[0] > es[1])
+        self.assertFalse(es[0] < es[1])
+        self.assertTrue(es[0] != es[1])
 
 class test_util(unittest.TestCase):
     def test_flip(self):
         res = []
         for i in range(1000):
-            res.append(util.flip.flip(0.5))
-        l = len(list(filter((lambda x: x), res)))
+            res.append(flip(0.5))
+        l = len([x for x in res if x])
         self.assertTrue(530 > l > 470)
 
 class test_work(unittest.TestCase):
