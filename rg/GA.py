@@ -1,5 +1,5 @@
 import random
-from util.flip import flip
+from .util.flip import flip
 
 class Entity:
     def __init__(self,
