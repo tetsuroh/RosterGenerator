@@ -16,6 +16,9 @@ class Entity:
     def __eq__(self, o):
         return self.fitness == o.fitness
 
+    def __ne__(self, o):
+        return self.fitness != o.fitness
+
     def __lt__(self, o):
         return self.fitness < o.fitness
 
