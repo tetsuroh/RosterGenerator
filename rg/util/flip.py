@@ -1,4 +1,5 @@
 import random
 
+
 def flip(rate):
-    return random.random() > rate
+    return random.random() < rate
