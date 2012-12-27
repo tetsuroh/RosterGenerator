@@ -100,7 +100,7 @@ class GA:
         Please override in subclass.
 
         """
-        GENOM_LEN = 400
+        GENOM_LEN = 368
 
         def random_gene(length):
             gene = []
@@ -206,9 +206,10 @@ class GA:
         while self.generation < self.max_generations:
             self.calc_fitness()
             self.sort_entities()
-            print("""
-Generation: %d
+            '''
+            print("""Generation: %d
 Fitness: %d""" % (self.generation, self.entities[0].fitness))
+'''
             if (self.entities[0].isPerfect()):
                 return self.entities[0]
             else:

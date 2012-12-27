@@ -1,9 +1,11 @@
 from rg import *
 import json
 
+
 def load_setting(path, filename, encoding="utf-8"):
     with open(path + filename, "r", encoding=encoding) as fp:
         return json.load(fp)
+
 
 def save_setting(obj, path, filenmae, encoding="utf-8"):
     with open(path + filename, "w", encoding=encoding) as fp:
@@ -13,7 +15,7 @@ def save_setting(obj, path, filenmae, encoding="utf-8"):
 def main():
     # init employee
     # シフトの種類とその内容
-    works = load_setting("./settings/sunhome_kitchen/", "works.json")
+    settings = load_setting("./settings/", "sunhome_kitchen.json")
 
     # その月の最後の日
     lastday_of_the_month = 31
@@ -25,28 +27,28 @@ def main():
             ("モリ", "常勤"),
             ("マスジマ", "常勤"),
             ("ソンダ", "常勤"),
-            ("ヤマモト", "パート2"),
-            ("サトウ", "パートB"),
-            ("コンノ", "パートB")
-            ]
-        ]
-    
+            ("ヤマモト", "パート"),
+            ("サトウ", "パート"),
+            ("コンノ", "パート")]]
+
     # 従業員のシフト内容を設定
     for employee in employees:
-        employee.works = works[employee.status]
+        employee.works = settings['works'][employee.status]
 
     rosters = []
-    for i in range(20):
+    for i in range(800):
         rosters.append(Roster(lastday_of_the_month, employees))
 
     csv = convert(randomize(rosters[0]))
     with open("roster.csv", mode="w", encoding="utf-8") as filep:
         filep.write(csv)
     print("complete")
+    input()
     '''
     rostersに対してランダムにあれこれしたりしてほげほげする。
     Date関連と乱数関連のことを調べての頃のとこを実装スべし。
     '''
+
 
 def sort_rosters(rosters):
     if not rosters:
@@ -57,6 +59,7 @@ def sort_rosters(rosters):
         return [r for r in rosters if check(r) <= head_problems] + \
             [head] + \
             [r for r in rosters if check(r) > head_problems]
+
 
 class RosterChecker:
     def __init__(self):

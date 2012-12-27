@@ -1,7 +1,9 @@
 import unittest
+import doctest
 
 # pyflakes.ignore
 from rg import *
+
 
 class test_ga(unittest.TestCase):
     def test_entity(self):
@@ -23,6 +25,11 @@ class test_ga(unittest.TestCase):
         self.assertFalse(es[0] < es[1])
         self.assertTrue(es[0] != es[1])
 
+    def test_ga(self):
+        ga = GA()
+        ga.evolve_verbose()
+
+
 class test_util(unittest.TestCase):
     def test_flip(self):
         res = []
@@ -30,6 +37,9 @@ class test_util(unittest.TestCase):
             res.append(flip(0.5))
         l = len([x for x in res if x])
         self.assertTrue(530 > l > 470)
+        for i in range(100):
+            self.assertTrue(5 <= rand(10, 5) < 10)
+
 
 class test_work(unittest.TestCase):
     def setUp(self):
