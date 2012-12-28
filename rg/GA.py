@@ -70,14 +70,14 @@ class Entity:
 
 class GA:
     def __init__(self,
-                 popSize=800,  # population size
-                 aSize=30,     # archive size
+                 popSize=100,  # population size
+                 aSize=10,     # archive size
                  maxGene=50,  # maximum number of generations
                  cRate=0.8,    # crossover rate
                  mRate=0.06,   # mutation rate
                  cParam=0.5,   # parameter for crossover
                  mParam=0.02,  # parameter for mutation
-                 tSize=15      # tournament size
+                 tSize=8      # tournament size
                  ):
         self.population_size = popSize
         self.archive_size = aSize
@@ -92,7 +92,7 @@ class GA:
         self.initialize_population()
         self.next_generation = []
         self.generation = 0
-        self.log = ""
+        self.log = []
 
     def initialize_population(self):
         """
@@ -100,7 +100,7 @@ class GA:
         Please override in subclass.
 
         """
-        GENOM_LEN = 368
+        GENOM_LEN = 38
 
         def random_gene(length):
             gene = []
@@ -192,7 +192,7 @@ class GA:
                     sort([e for e in es if e >= head])
         self.entities = sort(self.entities)
 
-    def evolve(self):
+    def evolution_step(self):
         self.next_generation = []
         self.generation += 1
 
@@ -202,18 +202,20 @@ class GA:
         self.entities = self.next_generation
         self.perform_mutation()
 
-    def evolve_verbose(self):
+    def evolve(self, verbosely=False):
         while self.generation < self.max_generations:
             self.calc_fitness()
             self.sort_entities()
-            '''
-            print("""Generation: %d
-Fitness: %d""" % (self.generation, self.entities[0].fitness))
-'''
             if (self.entities[0].isPerfect()):
                 return self.entities[0]
             else:
-                self.evolve()
+                if verbosely:
+                    print("Generation: %d Fitness: %d" %
+                          (self.generation, self.entities[0].fitness))
+                self.evolution_step()
+
+    def evolve_verbose(self):
+        self.evolve(True)
 
 if __name__ == '__main__':
     import doctest
