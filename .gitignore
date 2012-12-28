@@ -8,3 +8,5 @@ roster.csv
 settings/*
 settings
 *_flymake*
+docs
+docs/*
