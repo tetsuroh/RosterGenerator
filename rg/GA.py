@@ -1,3 +1,11 @@
+"""
+Framework of genetic algorithm.
+"""
+__author__ = "Tetsuroh <tetsuroh.js@gmail.comm>"
+__status__ = "production"
+__version__ = "0.0.1"
+__date__ = "28 December 2012"
+
 from .util.flip import flip
 from .util.random_roster import rand
 
@@ -57,14 +65,24 @@ class Entity:
 
     @property
     def fitness(self):
+        """
+        Getter
+        """
         return self._fitness
 
     @fitness.setter
     def fitness(self, fitness):
+        """
+        Please override this method if you calculate
+        fitness from any conditions.
+        """
         self._fitness = fitness
 
     @fitness.deleter
     def fitness(self):
+        """
+        Deleter
+        """
         del self._fitness
 
 
@@ -99,6 +117,9 @@ class GA:
         This method is virtual function.
         Please override in subclass.
 
+        Initialize population in this function.
+        You append to your entities to self.entities, and
+        then initialize entities.
         """
         GENOM_LEN = 38
 
@@ -117,8 +138,8 @@ class GA:
 
     def tournament_selection(self):
         '''
-        self.entitiesの中から親を2つ選択する
-        self.entitiesはソート済みとする
+        Select father and mother.
+        self.entities have to sorted by own fitness.
         '''
         indexes = list(range(self.population_size))
         for i in range(self.tournament_size):
@@ -136,7 +157,9 @@ class GA:
         This method is virtual function.
         Please override in subclass.
 
-        crossover :: Entity -> Entity -> (Meybe Entity, Maybe Entity)
+        This function does not always perform crossover.
+        If perform crossover, this function returns a (Entity, Entity).
+        Otherwise it returns empty pair ().
         """
         child1 = Entity([], self.mutaion_rate, self.mutaion_parameter)
         child2 = Entity([], self.mutaion_rate, self.mutaion_parameter)
@@ -153,9 +176,17 @@ class GA:
             return (child1, child2)
 
     def perform_archive(self):
+        """
+        self.entities have to sorted by own fitness.
+
+        Best entities so far.
+        """
         self.next_generation = self.entities[:self.archive_size]
 
     def perform_crossover(self):
+        """
+        Perform crossover to every entities.
+        """
         for _ in range(int((self.population_size - self.archive_size) / 2)):
             children = None
             while not children:
@@ -164,6 +195,9 @@ class GA:
             self.next_generation.append(children[1])
 
     def perform_mutation(self):
+        """
+        Perform mutaion to every entities.
+        """
         if not flip(self.mutaion_rate):
             return
         for entity in self.entities:
@@ -183,6 +217,10 @@ class GA:
             e.fitness = fitness
 
     def sort_entities(self):
+        """
+        Sort entities.
+        self.entities needs Entity#__lt__, Entity#__ge__ methods.
+        """
         def sort(es):
             if not es:
                 return []
@@ -193,6 +231,9 @@ class GA:
         self.entities = sort(self.entities)
 
     def evolution_step(self):
+        """
+        Perform single evolution step.
+        """
         self.next_generation = []
         self.generation += 1
 
@@ -203,6 +244,10 @@ class GA:
         self.perform_mutation()
 
     def evolve(self, verbosely=False):
+        """
+        Do the evolution until find perfect entity or
+        reach max generations limit.
+        """
         while self.generation < self.max_generations:
             self.calc_fitness()
             self.sort_entities()
@@ -215,6 +260,9 @@ class GA:
                 self.evolution_step()
 
     def evolve_verbose(self):
+        """
+        Do the evolution, verbosely.
+        """
         self.evolve(True)
 
 if __name__ == '__main__':
