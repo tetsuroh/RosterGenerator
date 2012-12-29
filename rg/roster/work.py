@@ -1,4 +1,5 @@
 
+
 class Work:
     def __init__(self, work="", locked=False):
         '''
@@ -21,10 +22,8 @@ class Work:
 
     def __repr__(self):
         return str(self)
-        
-def test():
-    import doctest
-    doctest.testmod()
+
 
 if __name__ == '__main__':
-    test()
+    import doctest
+    doctest.testmod()

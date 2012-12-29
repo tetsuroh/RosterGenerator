@@ -1,5 +1,7 @@
+
+
 class Employee:
-    def __init__(self, name, status, works = []):
+    def __init__(self, name, status, works=[]):
         '''
         >>> employee = Employee('tom', 'A')
         >>> employee.name()
@@ -34,7 +36,7 @@ class Employee:
         self.name = name
         self.status = status
         self.shift = None
-        self.workday = [] # ["Mon", "Tue" "Sat"]
+        self.workday = []  # ["Mon", "Tue" "Sat"]
         self.workdays_in_week = None
         self.workdays_in_month = None
         self.skill_level = None
@@ -65,7 +67,7 @@ class Employee:
     def workday(self):
         '''[day of the week]
         For instance
-        ['monday', 'sunday'] 
+        ['monday', 'sunday']
         '''
         return self._workday
 
@@ -119,10 +121,6 @@ class Employee:
         return self
 
 
-def test():
+if __name__ == '__main__':
     import doctest
     doctest.testmod()
-
-if __name__ == '__main__':
-    test()
-    pass

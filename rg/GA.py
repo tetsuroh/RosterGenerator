@@ -1,13 +1,14 @@
 """
 Framework of genetic algorithm.
 """
-__author__ = "Tetsuroh <tetsuroh.js@gmail.comm>"
+__author__ = "Tetsuroh <tetsuroh.js@gmail.com>"
 __status__ = "production"
 __version__ = "0.0.1"
 __date__ = "28 December 2012"
+__all__ = ["Entity", "GA"]
 
-from .util.flip import flip
-from .util.random_roster import rand
+from rg.util.flip import flip
+from rg.util.random_roster import rand
 
 
 class Entity:

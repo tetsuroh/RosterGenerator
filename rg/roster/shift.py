@@ -1,8 +1,8 @@
 import collections
 
-from .work import Work
-from .employee import Employee
-    
+from rg.roster.work import Work
+
+
 class Shift(collections.MutableSequence):
     def __init__(self, lastday, employee):
         '''
@@ -39,13 +39,13 @@ class Shift(collections.MutableSequence):
 
     def _check(self, value):
         return isinstance(value, Work)
-        
+
     def __setitem__(self, i, value):
         if self._check(value):
             self._shift[i] = value
         else:
             raise TypeError
-        
+
     def insert(self, i, value):
         if self._check(value):
             self._shift.insert(i, value)

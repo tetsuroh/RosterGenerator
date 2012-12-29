@@ -1,10 +1,7 @@
 import collections
-import random
 
-from .work import Work
-from .shift import Shift
-from .employee import Employee
-from ..util.flip import flip
+from rg.roster.shift import Shift
+
 
 class Roster(collections.MutableSequence):
     def __init__(self, lastday, employees):
@@ -28,7 +25,6 @@ class Roster(collections.MutableSequence):
         for e in employees:
             self.append(Shift(lastday, e))
 
-        
     def __iter__(self):
         self.index = 0
         return self
@@ -43,13 +39,13 @@ class Roster(collections.MutableSequence):
 
     def __delitem__(self, i):
         del self.list[i]
-        
+
     def __len__(self):
         return len(self._roster)
 
     def __repr__(self):
         return str(self._roster)
-    
+
     def __getitem__(self, key):
         return self._roster[key]
 
@@ -65,15 +61,6 @@ class Roster(collections.MutableSequence):
         else:
             raise ValueError()
 
-    def cross_over(self, other):
-        child = Roster(self.lastday, self.employees)
-        for i in range(len(self)):
-            for j in range(len(self[i])):
-                if not fday.locked:
-                    child[i][j].work = self[i][j].work if flip(0.5) \
-                        else other[i][j].work
-        return child
-
     def clone(self):
         roster = Roster(self.lastday, self.employees)
         for (cshift, pshift) in zip(roster, self):
@@ -86,6 +73,7 @@ class Roster(collections.MutableSequence):
 
     def works_at(self, index):
         return self.works_on(index + 1)
+
 
 def test():
     import doctest
