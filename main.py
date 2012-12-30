@@ -40,7 +40,7 @@ def main():
         rosters.append(Roster(lastday_of_the_month, employees))
 
     csv = convert(randomize(rosters[0]))
-    with open("roster.csv", mode="w", encoding="utf-8") as filep:
+    with open("out.csv", mode="w", encoding="utf-8") as filep:
         filep.write(csv)
     print("complete")
     input()

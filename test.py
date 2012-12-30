@@ -1,5 +1,4 @@
 import unittest
-import doctest
 
 # pyflakes.ignore
 from rg import *
