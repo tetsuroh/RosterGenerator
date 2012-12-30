@@ -35,7 +35,7 @@ class test_util(unittest.TestCase):
         for i in range(1000):
             res.append(flip(0.5))
         l = len([x for x in res if x])
-        self.assertTrue(530 > l > 470)
+        self.assertTrue(550 > l > 450)
         for i in range(100):
             self.assertTrue(5 <= rand(10, 5) < 10)
 
