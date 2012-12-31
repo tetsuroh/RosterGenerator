@@ -19,8 +19,8 @@ def randomize(roster):
     """
     for shift in roster:
         employee = shift.employee
-        for work in shift:
-            if not work.locked:
+        for day in shift:
+            if not day.locked:
                 l = len(employee.works)
-                work.work = employee.works[rand(l)]
+                day.work = employee.works[rand(l)]
     return roster
