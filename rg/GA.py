@@ -23,8 +23,8 @@ class Entity:
                  mParam
                  ):
         self.gene = gene
-        self.mutaion_rate = mRate
-        self.mutaion_parameter = mParam
+        self.mutation_rate = mRate
+        self.mutation_parameter = mParam
 
         self._fitness = None
 
@@ -62,11 +62,11 @@ class Entity:
 
         This method is to mutate the entity
         """
-        if not flip(self.mutaion_rate):
+        if not flip(self.mutation_rate):
             return
 
         for i in range(len(self.gene)):
-            if flip(self.mutaion_parameter):
+            if flip(self.mutation_parameter):
                 self.gene[i] = 0 if self.gene[i] else 1
 
     @property
@@ -107,9 +107,9 @@ class GA:
         self.archive_size = aSize
         self.max_generations = maxGene
         self.crossover_rate = cRate
-        self.mutaion_rate = mRate
+        self.mutation_rate = mRate
         self.crossover_parameter = cParam
-        self.mutaion_parameter = mParam
+        self.mutation_parameter = mParam
         self.tournament_size = tSize
 
         self.entities = []
@@ -138,8 +138,8 @@ class GA:
         for i in range(self.population_size):
             gene = random_gene(GENOM_LEN)
             self.entities.append(Entity(gene,
-                                        self.mutaion_rate,
-                                        self.mutaion_parameter))
+                                        self.mutation_rate,
+                                        self.mutation_parameter))
         self.answer = random_gene(GENOM_LEN)
 
     def tournament_selection(self):
@@ -167,8 +167,8 @@ class GA:
         If perform crossover, this function returns a (Entity, Entity).
         Otherwise it returns empty pair ().
         """
-        child1 = Entity([], self.mutaion_rate, self.mutaion_parameter)
-        child2 = Entity([], self.mutaion_rate, self.mutaion_parameter)
+        child1 = Entity([], self.mutation_rate, self.mutation_parameter)
+        child2 = Entity([], self.mutation_rate, self.mutation_parameter)
         if not flip(self.crossover_rate):
             return ()
         else:
@@ -202,9 +202,9 @@ class GA:
 
     def perform_mutation(self):
         """
-        Perform mutaion to every entities.
+        Perform mutation to every entities.
         """
-        if not flip(self.mutaion_rate):
+        if not flip(self.mutation_rate):
             return
         for entity in self.entities:
             entity.mutation()
