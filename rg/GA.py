@@ -17,6 +17,9 @@ from rg.util.random_roster import rand
 
 
 class Entity:
+    """
+    Entity for Genetic Algorithm Application.
+    """
     def __init__(self,
                  gene,
                  mRate,
@@ -48,19 +51,19 @@ class Entity:
 
     def is_perfect(self):
         """
+        This method examines whether or not this entity is perfect.
+
         This method is virtual function
         Please override in subclass
-
-        This method examines whether or not this entity is perfect.
         """
         return self.fitness == 0
 
     def mutation(self):
         """
+        This method is to mutate the entity
+
         This method is virtual function
         Please override in subclass
-
-        This method is to mutate the entity
         """
         if not flip(self.mutation_rate):
             return
@@ -96,12 +99,12 @@ class GA:
     def __init__(self,
                  popSize=100,  # population size
                  aSize=10,     # archive size
-                 maxGene=50,  # maximum number of generations
+                 maxGene=50,   # maximum number of generations
                  cRate=0.8,    # crossover rate
                  mRate=0.06,   # mutation rate
                  cParam=0.5,   # parameter for crossover
                  mParam=0.02,  # parameter for mutation
-                 tSize=8      # tournament size
+                 tSize=8       # tournament size
                  ):
         self.population_size = popSize
         self.archive_size = aSize
@@ -258,6 +261,7 @@ class GA:
             self.calc_fitness()
             self.sort_entities()
             if (self.entities[0].is_perfect()):
+                print("Perfect entity, found.")
                 return self.entities[0]
             else:
                 if verbosely:
