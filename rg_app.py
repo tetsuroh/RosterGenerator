@@ -14,7 +14,7 @@ __all__ = ["RGApp"]
 
 from random import sample
 
-from rg import Roster, Entity, GA, Employee, randomize, flip
+from rg import Roster, Entity, GA, Employee, randomize, flip, rand
 from rg.util.settings import load
 
 
@@ -39,6 +39,7 @@ class REntity(Entity):
                         Roster(lastday, employees),
                         mRate,
                         mParam)
+        self.lastday = lastday
         if gene:
             self.gene = gene
         else:
@@ -63,13 +64,14 @@ class RGApp(GA):
         self.settings = load(filename)
         self.population_size = self.settings['GA']['population_size']
         self.archive_size = self.settings['GA']['archive_size']
-        self.max_generation = self.settings['GA']['max_generation']
+        self.max_generations = self.settings['GA']['max_generation']
         self.crossover_rate = self.settings['GA']['crossover_rate']
         self.mutation_rate = self.settings['GA']['mutation_rate']
         self.crossover_parameter = self.settings['GA']['crossover_parameter']
         self.mutation_parameter = self.settings['GA']['mutation_parameter']
         self.tournament_size = self.settings['GA']['tournament_size']
 
+        self.generation = 0
         self.initialize_employees()
         self.initialize_population()
 
@@ -92,10 +94,42 @@ class RGApp(GA):
                                            employee['status'],
                                            works[employee['status']]))
 
+    def crossover(self, mother, father):
+        """ Do crossover onece. """
+        child1 = REntity(self.mutation_rate,
+                         self.mutation_parameter,
+                         self.settings['lastday'],
+                         self.employees)
+        child2 = REntity(self.mutation_rate,
+                         self.mutation_parameter,
+                         self.settings['lastday'],
+                         self.employees)
+        if not flip(self.crossover_rate):
+            return ()
+        for (ms, fs, c1s, c2s) in zip(mother.gene, father.gene,
+                                      child1.gene, child2.gene):
+            for (md, fd, c1d, c2d) in zip(ms, fs, c1s, c2s):
+                if flip(self.crossover_parameter):
+                    c1d.work = md.work
+                    c2d.work = fd.work
+                else:
+                    c1d.work = fd.work
+                    c2d.work = md.work
+        return (child1, child2)
+
+    def calc_fitness(self):
+        """
+        This method calculates fitness for every entities.
+        Stub.
+        """
+        for e in self.entities:
+            e.fitness = rand(30)
+
 
 def main():
     global rgapp
     rgapp = RGApp("./settings/sunhome_kitchen.json")
+    rgapp.evolve_verbose()
 
 if __name__ == '__main__':
     main()
