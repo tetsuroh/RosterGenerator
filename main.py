@@ -2,25 +2,14 @@ from rg import *
 import json
 
 
-def load_setting(path, filename, encoding="utf-8"):
-    with open(path + filename, "r", encoding=encoding) as fp:
-        return json.load(fp)
-
-
-def save_setting(obj, path, filenmae, encoding="utf-8"):
-    with open(path + filename, "w", encoding=encoding) as fp:
-        fp.write(json.dumps(obj, indent=2, ensure_ascii=False))
-
-
 def main():
-    # init employee
-    # シフトの種類とその内容
+    # load settings
     settings = load_setting("./settings/", "sunhome_kitchen.json")
 
-    # その月の最後の日
+    # lastday of the month
     lastday_of_the_month = 31
 
-    # 従業員登録
+    # initialize employees
     employees = [
         Employee(name, status) for (name, status)in [
             ("サイトウ", "常勤"),
@@ -71,9 +60,9 @@ class RosterChecker:
         problems += self.check_holiday(roster)
         return problems
 
-    
     def check_day_on():
         pass
+
 
 def check(roster):
     problem = 0
