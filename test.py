@@ -2,9 +2,30 @@ import unittest
 
 # pyflakes.ignore
 from rg import *
+import rg_app
 
 
-class test_ga(unittest.TestCase):
+class TestRGApp(unittest.TestCase):
+    def setUp(self):
+        self.rgapp = rg_app.RGApp("./settings/sunhome_kitchen.json")
+
+    def test_rentity_compare(self):
+        e1 = self.rgapp.entities[0]
+        e2 = self.rgapp.entities[1]
+        e1.fitness = e2.fitness = 1
+        self.assertTrue(e1 >= e2)
+        self.assertTrue(e1 <= e2)
+        self.assertTrue(e1 == e2)
+        self.assertFalse(e1 != e2)
+
+        e2.fitness = 2
+        self.assertFalse(e1 >= e2)
+        self.assertFalse(e1 == e2)
+        self.assertTrue(e1 <= e2)
+        self.assertTrue(e1 != e2)
+
+
+class TestGa(unittest.TestCase):
     def test_entity(self):
         es = []
         es.append(Entity([], 0.1, 0.1))
