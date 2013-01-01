@@ -3,7 +3,12 @@ Framework of genetic algorithm.
 """
 __author__ = "Tetsuroh <tetsuroh.js@gmail.com>"
 __status__ = "production"
-__version__ = "0.0.1"
+
+__major__ = 0
+__minor__ = 1
+__relase__ = 1
+__version__ = "%d.%d.%d" % (__major__, __minor__, __relase__)
+
 __date__ = "28 December 2012"
 __all__ = ["Entity", "GA"]
 
@@ -41,7 +46,7 @@ class Entity:
     def __ge__(self, o):
         return self.fitness >= o.fitness
 
-    def isPerfect(self):
+    def is_perfect(self):
         """
         This method is virtual function
         Please override in subclass
@@ -252,7 +257,7 @@ class GA:
         while self.generation < self.max_generations:
             self.calc_fitness()
             self.sort_entities()
-            if (self.entities[0].isPerfect()):
+            if (self.entities[0].is_perfect()):
                 return self.entities[0]
             else:
                 if verbosely:
