@@ -5,12 +5,12 @@ from rg import *
 import rg_app
 
 
-def foldl1(fn, ls):
+def foldr1(fn, ls):
     def foldl(fn, x, ls):
         if not ls:
             return x
         else:
-            return foldl(fn, fn(x, ls.pop()), ls)
+            return foldl(fn, fn(ls.pop(), x), ls)
     if len(ls) == 1:
         return ls[0]
     else:
