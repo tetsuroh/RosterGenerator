@@ -4,7 +4,7 @@ import unittest
 from rg import *
 import rg_app
 
-
+"""
 def foldr1(fn, ls):
     def foldl(fn, x, ls):
         if not ls:
@@ -15,6 +15,7 @@ def foldr1(fn, ls):
         return ls[0]
     else:
         return foldl(fn, ls.pop(), ls)
+"""
 
 
 class TestRGApp(unittest.TestCase):
