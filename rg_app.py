@@ -123,13 +123,35 @@ class RGApp(GA):
         Stub.
         """
         for e in self.entities:
-            e.fitness = rand(30)
+            fitness = 0
+            working = 0
+            for shift in e.gene:
+                for day in shift:
+                    if day.work != "休" or day.work != "有":
+                        working += 1
+                    else:
+                        if working > 5:
+                            fitness += working - 5
+                        working = 0
+            e.fitness = fitness
+
+            for i in range(len(shift)):
+                works = e.gene.works_at(i)
+                if works.count("A") != 1:
+                    fitness += 1
+                if works.count("C") != 1:
+                    fitness += 1
+                if 0 < works.count("B") <= 2:
+                    fitness += 1
+                if works.count("2") != 1:
+                    fitness += 1
 
 
 def main():
     global rgapp
     rgapp = RGApp("./settings/sunhome_kitchen.json")
     rgapp.evolve_verbose()
+    print(rgapp.entities[0].gene)
 
 if __name__ == '__main__':
     main()
