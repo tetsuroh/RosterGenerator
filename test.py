@@ -18,9 +18,9 @@ def foldr1(fn, ls):
 """
 
 
-class TestRGApp(unittest.TestCase):
+class TestREntity(unittest.TestCase):
     def setUp(self):
-        self.rgapp = rg_app.RGApp("./settings/sunhome_kitchen.json")
+        self.rgapp = rg_app.RGApp("./settings/test.json")
 
     def test_rentity_compare(self):
         e1 = self.rgapp.entities[0]
@@ -37,9 +37,9 @@ class TestRGApp(unittest.TestCase):
         self.assertTrue(e1 <= e2)
         self.assertTrue(e1 != e2)
 
-    def test_rentity_mutation(self):
+    def test_mutation(self):
         """
-        test_rentity_mutation
+        test_mutation
         Arguments:
         - `self`:
         """
