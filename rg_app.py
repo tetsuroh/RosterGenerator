@@ -72,6 +72,7 @@ class RGApp(GA):
         self.tournament_size = self.settings['GA']['tournament_size']
 
         self.generation = 0
+        self.log = []
         self.initialize_employees()
         self.initialize_population()
 
@@ -122,29 +123,42 @@ class RGApp(GA):
         This method calculates fitness for every entities.
         Stub.
         """
+        def countIf(xs, fn):
+            cnt = 0
+            for x in xs:
+                if fn(x):
+                    cnt += 1
+            return cnt
+
         for e in self.entities:
             fitness = 0
-            working = 0
             for shift in e.gene:
+                """
+                working = 0
                 for day in shift:
-                    if day.work != "休" or day.work != "有":
-                        working += 1
-                    else:
+                    if day.work == "休" or day.work == "有":
                         if working > 5:
                             fitness += working - 5
                         working = 0
-            e.fitness = fitness
+                    else:
+                        working += 1
 
+                leave = countIf(shift, lambda x: x.work == "休")
+                if leave != 8:
+                    fitness += abs(leave - 8)
+                #"""
             for i in range(len(shift)):
                 works = e.gene.works_at(i)
-                if works.count("A") != 1:
+                if countIf(works, lambda x: x.work == "A") != 1:
                     fitness += 1
-                if works.count("C") != 1:
+                if countIf(works, lambda x: x.work == "C") != 1:
                     fitness += 1
-                if 0 < works.count("B") <= 2:
+                if countIf(works, lambda x: x.work == "B") != 1:
                     fitness += 1
-                if works.count("2") != 1:
+                if countIf(works, lambda x: x.work == "2") != 1:
                     fitness += 1
+            #"""
+            e.fitness = fitness
 
 
 def main():
