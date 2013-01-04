@@ -254,6 +254,7 @@ class GA:
 
     def evolve(self, verbosely=False):
         """
+        evolve :: Boolean -> Entity
         Do the evolution until find perfect entity or
         reach max generations limit.
         """
@@ -271,9 +272,10 @@ class GA:
 
     def evolve_verbose(self):
         """
+        evolve_verbose :: Entity
         Do the evolution, verbosely.
         """
-        self.evolve(True)
+        return self.evolve(verbosely=True)
 
 if __name__ == '__main__':
     import doctest
