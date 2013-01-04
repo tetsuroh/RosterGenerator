@@ -15,6 +15,8 @@ __all__ = ["Entity", "GA"]
 from rg.util.flip import flip
 from rg.util.random_roster import rand
 
+from random import sample
+
 
 class Entity:
     """
@@ -151,15 +153,13 @@ class GA:
         self.entities have to sorted by own fitness.
         '''
         indexes = list(range(self.population_size))
-        for i in range(self.tournament_size):
-            indexes.append(indexes.pop(rand(self.population_size - i)))
+        selections = sample(indexes, self.tournament_size)
+        selections.sort()
+        fst = selections[0]
+        snd = selections[1]
 
-        fst = snd = self.population_size
-        for i in indexes[-self.tournament_size:]:
-            fst = i if i < fst else fst
-            snd = i if i > fst and i < snd else snd
-
-        return (self.entities[fst], self.entities[snd])
+        return (self.entities[fst],
+                self.entities[snd])
 
     def crossover(self, mother, father):
         """
@@ -263,12 +263,16 @@ class GA:
             self.sort_entities()
             if (self.entities[0].is_perfect()):
                 print("Perfect entity, found.")
-                return self.entities[0]
+                break
             else:
                 if verbosely:
                     print("Generation: %d Fitness: %d" %
-                          (self.generation, self.entities[0].fitness))
+                          (self.generation,
+                           self.entities[0].fitness))
                 self.evolution_step()
+        self.calc_fitness()
+        self.sort_entities()
+        return self.entities[0]
 
     def evolve_verbose(self):
         """
