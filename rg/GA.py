@@ -13,7 +13,6 @@ __date__ = "28 December 2012"
 __all__ = ["Entity", "GA"]
 
 from rg.util.flip import flip
-from rg.util.random_roster import rand
 
 from random import sample
 
@@ -118,7 +117,6 @@ class GA:
         self.tournament_size = tSize
 
         self.entities = []
-        self.initialize_population()
         self.next_generation = []
         self.generation = 0
         self.log = []

@@ -1,8 +1,8 @@
 import unittest
 
 # pyflakes.ignore
-from rg import *
-import rg_app
+from rg import Entity, GA, flip, rand, Work
+from rg import app
 
 """
 def foldr1(fn, ls):
@@ -20,7 +20,7 @@ def foldr1(fn, ls):
 
 class TestREntity(unittest.TestCase):
     def setUp(self):
-        self.rgapp = rg_app.RGApp("./settings/test.json")
+        self.rgapp = app.RGApp("./settings/test.json")
 
     def test_rentity_compare(self):
         e1 = self.rgapp.entities[0]
@@ -87,16 +87,17 @@ class TestGa(unittest.TestCase):
 
     def test_ga(self):
         ga = GA()
+        ga.initialize_population()
         ga.evolve_verbose()
 
 
 class test_util(unittest.TestCase):
     def test_flip(self):
         res = []
-        for i in range(1000):
-            res.append(flip(0.5))
+        for i in range(100):
+            res.append(flip(0.1))
         l = len([x for x in res if x])
-        self.assertTrue(550 > l > 450)
+        self.assertTrue(l < 15)
         for i in range(100):
             self.assertTrue(5 <= rand(10, 5) < 10)
 
