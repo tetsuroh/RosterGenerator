@@ -1,5 +1,5 @@
 from rg import convert
-from rg_app import RGApp
+from rg.app import RGApp
 
 from time import time
 
