@@ -133,30 +133,31 @@ class RGApp(GA):
         for e in self.entities:
             fitness = 0
             for shift in e.gene:
-                """
+                #"""
                 working = 0
+                over_work = 0
                 for day in shift:
                     if day.work == "休" or day.work == "有":
-                        if working > 5:
-                            fitness += working - 5
                         working = 0
-                    else:
+                    else:  # When the day isnt holiday or paid leave
                         working += 1
-
+                        over_work += 1 if working > 5 else 0
+                fitness += over_work
                 leave = countIf(shift, lambda x: x.work == "休")
                 if leave != 8:
                     fitness += abs(leave - 8)
-                #"""
+
+            #"""
             for i in range(len(shift)):
                 works = e.gene.works_at(i)
                 if countIf(works, lambda x: x.work == "A") != 1:
                     fitness += 1
                 if countIf(works, lambda x: x.work == "C") != 1:
                     fitness += 1
-                if countIf(works, lambda x: x.work == "B") != 1:
-                    fitness += 1
+                if countIf(works, lambda x: x.work == "B") >= 1:
+                    pass  # fitness += 1
                 if countIf(works, lambda x: x.work == "2") != 1:
-                    fitness += 1
+                    pass  # fitness += 1
             #"""
             e.fitness = fitness
 
