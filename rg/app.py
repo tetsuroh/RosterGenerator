@@ -107,15 +107,15 @@ class RGApp(GA):
                          self.employees)
         if not flip(self.crossover_rate):
             return ()
-        for (ms, fs, c1s, c2s) in zip(mother.gene, father.gene,
-                                      child1.gene, child2.gene):
-            for (md, fd, c1d, c2d) in zip(ms, fs, c1s, c2s):
-                if flip(self.crossover_parameter):
-                    c1d.work = md.work
-                    c2d.work = fd.work
-                else:
-                    c1d.work = fd.work
-                    c2d.work = md.work
+        for i in range(self.days):
+            if flip(self.crossover_parameter):
+                mother, father = father, mother
+            for (md, fd, c1d, c2d) in zip(mother.gene.works_at(i),
+                                          father.gene.works_at(i),
+                                          child1.gene.works_at(i),
+                                          child2.gene.works_at(i)):
+                c1d.work = md.work
+                c2d.work = fd.work
         return (child1, child2)
 
     def calc_fitness(self):
