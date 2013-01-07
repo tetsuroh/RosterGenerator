@@ -117,7 +117,8 @@ class GA:
         self.tournament_size = tSize
 
         self.entities = []
-        self.next_generation = []
+        self.best_entity = None
+        self.next_generations = []
         self.generation = 0
         self.log = []
 
@@ -188,7 +189,7 @@ class GA:
 
         Best entities so far.
         """
-        self.next_generation = self.entities[:self.archive_size]
+        self.next_generations = self.entities[:self.archive_size]
 
     def perform_crossover(self):
         """
@@ -198,8 +199,8 @@ class GA:
             children = None
             while not children:
                 children = self.crossover(*self.tournament_selection())
-            self.next_generation.append(children[0])
-            self.next_generation.append(children[1])
+            self.next_generations.append(children[0])
+            self.next_generations.append(children[1])
 
     def perform_mutation(self):
         """
@@ -237,17 +238,32 @@ class GA:
                     sort([e for e in es if e >= head])
         self.entities = sort(self.entities)
 
+    def save_best_entity(self):
+        if (
+                self.best_entity and
+                self.best_entity.fitness <=
+                self.entities[0].fitness
+        ):
+            return
+        else:
+            self.best_entity = self.entities[0]
+            if hasattr(self.entities[0].gene, 'clone'):
+                self.best_entity.gene = self.entities[0].gene.clone()
+            else:
+                self.best_entity.gene = self.entities[0].gene[:]
+
     def evolution_step(self):
         """
         Perform single evolution step.
         """
-        self.next_generation = []
+        self.save_best_entity()
+        self.next_generations = []
         self.generation += 1
 
         self.perform_archive()
         self.perform_crossover()
         # Alternations to the next generation.
-        self.entities = self.next_generation
+        self.entities = self.next_generations
         self.perform_mutation()
 
     def evolve(self, verbosely=False):
@@ -266,11 +282,14 @@ class GA:
                 if verbosely:
                     print("Generation: %d Fitness: %d" %
                           (self.generation,
+                           self.best_entity.fitness if
+                           self.best_entity else
                            self.entities[0].fitness))
                 self.evolution_step()
         self.calc_fitness()
         self.sort_entities()
-        return self.entities[0]
+        self.save_best_entity()
+        return self.best_entity
 
     def evolve_verbose(self):
         """
