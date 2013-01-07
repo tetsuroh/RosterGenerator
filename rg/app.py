@@ -14,7 +14,7 @@ __all__ = ["RGApp"]
 
 from random import sample
 
-from rg import Roster, Entity, GA, Employee, randomize, flip, rand
+from rg import Roster, Entity, GA, Employee, randomize, flip
 from rg.util.settings import load
 
 
@@ -62,17 +62,17 @@ class REntity(Entity):
 class RGApp(GA):
     def __init__(self, filename):
         self.settings = load(filename)
-        self.population_size = self.settings['GA']['population_size']
-        self.archive_size = self.settings['GA']['archive_size']
-        self.max_generations = self.settings['GA']['max_generation']
-        self.crossover_rate = self.settings['GA']['crossover_rate']
-        self.mutation_rate = self.settings['GA']['mutation_rate']
-        self.crossover_parameter = self.settings['GA']['crossover_parameter']
-        self.mutation_parameter = self.settings['GA']['mutation_parameter']
-        self.tournament_size = self.settings['GA']['tournament_size']
+        GA.__init__(self,
+                    self.settings['GA']['population_size'],
+                    self.settings['GA']['archive_size'],
+                    self.settings['GA']['max_generation'],
+                    self.settings['GA']['crossover_rate'],
+                    self.settings['GA']['mutation_rate'],
+                    self.settings['GA']['crossover_parameter'],
+                    self.settings['GA']['mutation_parameter'],
+                    self.settings['GA']['tournament_size'])
 
-        self.generation = 0
-        self.log = []
+        self.days = self.settings['lastday']
         self.initialize_employees()
         self.initialize_population()
 
