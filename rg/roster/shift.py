@@ -26,7 +26,6 @@ class Shift(collections.MutableSequence):
             self._shift.append(Work(work))
 
         self.employee = employee
-        self.extend(list(self._shift))
 
     def __len__(self):
         return len(self._shift)
