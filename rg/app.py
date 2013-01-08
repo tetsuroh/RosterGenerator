@@ -41,9 +41,18 @@ class REntity(Entity):
                         mParam)
         self.lastday = lastday
         if gene:
-            self.gene = gene
+            self.gene = gene.clone()
         else:
             randomize(self.gene)
+
+    def clone(self):
+        e = REntity(self.mutation_rate,
+                    self.mutation_parameter,
+                    self.lastday,
+                    self.employees,
+                    self.gene)
+        e.fitness = self.fitness
+        return e
 
     def is_perfect(self):
         return self.fitness == 0

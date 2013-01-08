@@ -51,6 +51,16 @@ class Entity:
         return self.fitness >= o.fitness
 
     def clone(self):
+        """
+        This method is make clone of self.
+        Not copy, do clone.
+        Because, copied entity changes　unintentionally
+        when original entity is mutation.
+        Don't forget copy entity's fitness :)
+
+        This method is virtual function.
+        Please override in subclass.
+        """
         e = Entity(self.gene,
                    self.mutation_rate,
                    self.mutation_parameter)
