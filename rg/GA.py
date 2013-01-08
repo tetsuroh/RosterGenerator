@@ -50,6 +50,13 @@ class Entity:
     def __ge__(self, o):
         return self.fitness >= o.fitness
 
+    def clone(self):
+        e = Entity(self.gene,
+                   self.mutation_rate,
+                   self.mutation_parameter)
+        e.fitness = self.fitness
+        return e
+
     def is_perfect(self):
         """
         This method examines whether or not this entity is perfect.
@@ -131,7 +138,7 @@ class GA:
         You append to your entities to self.entities, and
         then initialize entities.
         """
-        GENOM_LEN = 38
+        GENOM_LEN = 64
 
         def random_gene(length):
             gene = []
@@ -246,11 +253,7 @@ class GA:
         ):
             return
         else:
-            self.best_entity = self.entities[0]
-            if hasattr(self.entities[0].gene, 'clone'):
-                self.best_entity.gene = self.entities[0].gene.clone()
-            else:
-                self.best_entity.gene = self.entities[0].gene[:]
+            self.best_entity = self.entities[0].clone()
 
     def evolution_step(self):
         """
@@ -272,9 +275,9 @@ class GA:
         Do the evolution until find perfect entity or
         reach max generations limit.
         """
+        self.calc_fitness()
+        self.sort_entities()
         while self.generation < self.max_generations:
-            self.calc_fitness()
-            self.sort_entities()
             if (self.entities[0].is_perfect()):
                 print("Perfect entity, found.")
                 break
@@ -286,6 +289,8 @@ class GA:
                            self.best_entity else
                            self.entities[0].fitness))
                 self.evolution_step()
+            self.calc_fitness()
+            self.sort_entities()
         self.calc_fitness()
         self.sort_entities()
         self.save_best_entity()
