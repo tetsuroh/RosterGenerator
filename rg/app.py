@@ -14,7 +14,7 @@ __all__ = ["RGApp"]
 
 from random import sample
 
-from rg import Roster, Entity, GA, Employee, randomize, flip
+from rg import Roster, Entity, GA, Employee, Work, randomize, flip
 from rg.util.settings import load
 
 
@@ -32,18 +32,24 @@ class REntity(Entity):
     def __init__(self,
                  mRate,  # mutation rate. Chance of mutation
                  mParam,  # mutation parameter. Chance of mutation every gene
-                 lastday,
+                 settings,
                  employees,
                  gene=[]):
+        self.lastday = settings['lastday']
         Entity.__init__(self,
-                        Roster(lastday, employees),
+                        Roster(self.lastday, employees),
                         mRate,
                         mParam)
-        self.lastday = lastday
         if gene:
             self.gene = gene.clone()
         else:
             randomize(self.gene)
+            if settings['last_month_data']:
+                for ws in settings['last_month_data']:
+                    index = 0
+                    for (w, s) in zip(ws, self.gene):
+                        s.insert(index, Work(w, True))
+                        index += 1
 
     def clone(self):
         e = REntity(self.mutation_rate,
@@ -91,7 +97,7 @@ class RGApp(GA):
         for _ in range(self.population_size):
             rentity = REntity(self.mutation_rate,
                               self.mutation_parameter,
-                              self.settings['lastday'],
+                              self.settings,
                               self.employees)
             randomize(rentity.gene)
             self.entities.append(rentity)
