@@ -1,21 +1,8 @@
 import unittest
 
 # pyflakes.ignore
-from rg import Entity, GA, flip, rand, Work
+from rg import Entity, GA, flip, rand, Work, randomize
 from rg import app
-
-"""
-def foldr1(fn, ls):
-    def foldl(fn, x, ls):
-        if not ls:
-            return x
-        else:
-            return foldl(fn, fn(ls.pop(), x), ls)
-    if len(ls) == 1:
-        return ls[0]
-    else:
-        return foldl(fn, ls.pop(), ls)
-"""
 
 
 class TestREntity(unittest.TestCase):
@@ -36,6 +23,23 @@ class TestREntity(unittest.TestCase):
         self.assertFalse(e1 == e2)
         self.assertTrue(e1 <= e2)
         self.assertTrue(e1 != e2)
+
+    def test_works_on_days(self):
+        r = self.rgapp.entities[0].gene
+        self.works_on_days = r.works_on_days()
+        w = self.works_on_days
+        self.assertEqual(w[0][0].work, r[0][0].work)
+        self.assertEqual(w[0][1].work, r[1][0].work)
+        self.assertEqual(w[1][3].work, r[3][1].work)
+
+    def test_daily_shifts(self):
+        r = self.rgapp.entities[0].gene
+        minimum_shifts = self.rgapp.settings['daily_shifts']['minimum_shifts']
+        minimum_set = set(minimum_shifts)
+        for works in r.works_on_days():
+            for w in minimum_set:
+                self.assertEqual(minimum_shifts.count(w),
+                                 works.count(w))
 
     def test_mutation(self):
         """
@@ -63,6 +67,13 @@ class TestREntity(unittest.TestCase):
                     diff += 1
         print("Difference is %d." % (same - diff))
         self.assertTrue(diff != 0)
+
+    def test_clone(self):
+        clone_entity = self.rgapp.entities[0].clone().gene
+        origin_entity = self.rgapp.entities[0].gene
+        for (cs, os) in zip(clone_entity, origin_entity):
+            for (cd, od) in zip(cs, os):
+                self.assertEqual(cd.work, od.work)
 
 
 class TestGa(unittest.TestCase):

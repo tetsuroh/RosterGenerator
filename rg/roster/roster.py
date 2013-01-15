@@ -74,6 +74,19 @@ class Roster(collections.MutableSequence):
     def works_at(self, index):
         return self.works_on(index + 1)
 
+    @property
+    def works_on_days(self):
+        """
+        roster <- [['A', 'B', 'C'],
+                   ['C', 'A', 'B'],
+                   ['B', 'C', 'A']]
+        >>> roster.works_on_days()
+        [['A', 'C', 'B'],
+         ['B', 'A', 'C'],
+         ['C', 'B', 'A']]
+        """
+        return [self.works_at(i) for i in range(len(self._roster[0]))]
+
 
 def test():
     import doctest
