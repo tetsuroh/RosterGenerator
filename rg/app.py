@@ -31,7 +31,7 @@ class REntity(Entity):
     """
     def __init__(self,
                  mRate,  # mutation rate. Chance of mutation
-                 mParam,  # mutation parameter. Chance of mutation every gene
+                 mParam,  # mutation parameter. Chance of mutation gene
                  settings,
                  employees,
                  gene=[]):
@@ -132,12 +132,14 @@ class RGApp(GA):
         """ Do crossover onece. """
         child1 = REntity(self.mutation_rate,
                          self.mutation_parameter,
-                         self.settings['lastday'],
-                         self.employees)
+                         self.settings,
+                         self.employees,
+                         mother.gene)
         child2 = REntity(self.mutation_rate,
                          self.mutation_parameter,
-                         self.settings['lastday'],
-                         self.employees)
+                         self.settings,
+                         self.employees,
+                         father.gene)
         if not flip(self.crossover_rate):
             return ()
         for i in range(self.days):
