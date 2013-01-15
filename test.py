@@ -26,20 +26,31 @@ class TestREntity(unittest.TestCase):
 
     def test_works_on_days(self):
         r = self.rgapp.entities[0].gene
-        self.works_on_days = r.works_on_days()
+        self.works_on_days = r.works_on_days
         w = self.works_on_days
         self.assertEqual(w[0][0].work, r[0][0].work)
         self.assertEqual(w[0][1].work, r[1][0].work)
         self.assertEqual(w[1][3].work, r[3][1].work)
 
     def test_daily_shifts(self):
+        def count(ws, v):
+            c = 0
+            for w in ws:
+                c += 1 if w.work == v else 0
+            return c
         r = self.rgapp.entities[0].gene
         minimum_shifts = self.rgapp.settings['daily_shifts']['minimum_shifts']
         minimum_set = set(minimum_shifts)
-        for works in r.works_on_days():
-            for w in minimum_set:
+        pads = self.rgapp.settings['daily_shifts']['optional_shifts']
+        pads_set = set(pads)
+        for works in r.works_on_days:
+            for w in minimum_set - pads_set:
                 self.assertEqual(minimum_shifts.count(w),
-                                 works.count(w))
+                                 count(works, w))
+            """
+            for p in minimum_set & pads_set:
+                self.assertTrue(count(works, p) >= minimum_shifts.count(p))
+            """
 
     def test_mutation(self):
         """
