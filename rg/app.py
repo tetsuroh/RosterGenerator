@@ -12,9 +12,9 @@ __version__ = "%d.%d.%d" % (__major__, __minor__, __relase__)
 __date__ = "1 January 2013"
 __all__ = ["RGApp"]
 
-from random import sample
+from random import sample, shuffle
 
-from rg import Roster, Entity, GA, Employee, Work, randomize, flip
+from rg import Roster, Entity, GA, Employee, Work, flip, rand
 from rg.util.settings import load
 
 
@@ -35,26 +35,45 @@ class REntity(Entity):
                  settings,
                  employees,
                  gene=[]):
-        self.lastday = settings['lastday']
+        self.settings = settings
+        self.lastday = self.settings['lastday']
         Entity.__init__(self,
                         Roster(self.lastday, employees),
                         mRate,
                         mParam)
+        self.employees = employees
         if gene:
-            self.gene = gene.clone()
+            if hasattr(gene, "clone"):
+                self.gene = gene.clone()
+            elif type(gene) == list:
+                self.gene = gene[:]
+            else:
+                self.gene = gene
         else:
-            randomize(self.gene)
-            if settings['last_month_data']:
-                for ws in settings['last_month_data']:
-                    index = 0
-                    for (w, s) in zip(ws, self.gene):
-                        s.insert(index, Work(w, True))
-                        index += 1
+            minimum_shifts = self.settings['daily_shifts']['minimum_shifts']
+            pads = self.settings['daily_shifts']['optional_shifts']
+            # number of free position on day
+            padsize = len(self.gene.employees) - len(minimum_shifts)
+            for ws in self.gene.works_on_days:
+                daily_works = minimum_shifts + [pads[rand(len(pads))]
+                                                for _ in range(padsize)]
+                shuffle(daily_works)
+                for (w, dw) in zip(ws, daily_works):
+                    w.work = dw
+            if self.settings['last_month_data']:
+                self.append_last_month_data()
+
+    def append_last_month_data(self):
+        index = 0
+        for ws in self.settings['last_month_data']:
+            for (w, s) in zip(ws, self.gene):
+                s.insert(index, Work(w, True))
+            index += 1
 
     def clone(self):
         e = REntity(self.mutation_rate,
                     self.mutation_parameter,
-                    self.lastday,
+                    self.settings,
                     self.employees,
                     self.gene)
         e.fitness = self.fitness
@@ -99,7 +118,6 @@ class RGApp(GA):
                               self.mutation_parameter,
                               self.settings,
                               self.employees)
-            randomize(rentity.gene)
             self.entities.append(rentity)
 
     def initialize_employees(self):
@@ -179,7 +197,7 @@ class RGApp(GA):
 
 def main():
     global rgapp
-    rgapp = RGApp("./settings/sunhome_kitchen.json")
+    rgapp = RGApp("./settings/test.json")
     rgapp.evolve_verbose()
     print(rgapp.entities[0].gene)
 
