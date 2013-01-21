@@ -10,3 +10,5 @@ settings
 *_flymake*
 docs
 docs/*
+out
+out/*
