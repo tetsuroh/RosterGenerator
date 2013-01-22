@@ -13,6 +13,8 @@ __date__ = "1 January 2013"
 __all__ = ["RGApp"]
 
 from random import sample, shuffle
+import calendar
+from datetime import datetime, timedelta
 
 from rg import Roster, Entity, GA, Employee, Work, flip, rand
 from rg.util.settings import load
@@ -34,11 +36,15 @@ class REntity(Entity):
                  mParam,  # mutation parameter. Chance of mutation gene
                  settings,
                  employees,
+                 sdate,
+                 length,
                  gene=[]):
         self.settings = settings
-        self.lastday = self.settings['lastday']
+        self.sdate = sdate
+        self.length = length
+        self.offset = len(self.settings['last_month_data'])
         Entity.__init__(self,
-                        Roster(self.lastday, employees),
+                        Roster(self.sdate, self.length, employees),
                         mRate,
                         mParam)
         self.employees = employees
@@ -65,9 +71,13 @@ class REntity(Entity):
 
     def append_last_month_data(self):
         index = 0
+        date = datetime(self.settings['date']['year'],
+                        self.settings['date']['month'],
+                        self.settings['date']['day'])
         for ws in self.settings['last_month_data']:
+            this_date = date - timedelta(days=(self.offset - index))
             for (w, s) in zip(ws, self.gene):
-                s.insert(index, Work(w, True))
+                s.insert(index, Work(this_date, w, True))
             index += 1
 
     def clone(self):
@@ -75,6 +85,8 @@ class REntity(Entity):
                     self.mutation_parameter,
                     self.settings,
                     self.employees,
+                    self.sdate,
+                    self.length,
                     self.gene)
         e.fitness = self.fitness
         return e
@@ -105,8 +117,15 @@ class RGApp(GA):
                     self.settings['GA']['crossover_parameter'],
                     self.settings['GA']['mutation_parameter'],
                     self.settings['GA']['tournament_size'])
-
-        self.days = self.settings['lastday']
+        # First day of roster.
+        self.sdate = datetime(self.settings['date']['year'],
+                              self.settings['date']['month'],
+                              self.settings['date']['day'])
+        if self.settings['length']:
+            self.length = self.settings['length']
+        else:
+            (_, self.length) = calendar.monthrange(self.sdate.year,
+                                                   self.sdate.month)
         self.initialize_employees()
         self.initialize_population()
 
@@ -117,7 +136,9 @@ class RGApp(GA):
             rentity = REntity(self.mutation_rate,
                               self.mutation_parameter,
                               self.settings,
-                              self.employees)
+                              self.employees,
+                              self.sdate,
+                              self.length)
             self.entities.append(rentity)
 
     def initialize_employees(self):
@@ -134,15 +155,19 @@ class RGApp(GA):
                          self.mutation_parameter,
                          self.settings,
                          self.employees,
+                         self.sdate,
+                         self.length,
                          mother.gene)
         child2 = REntity(self.mutation_rate,
                          self.mutation_parameter,
                          self.settings,
                          self.employees,
+                         self.sdate,
+                         self.length,
                          father.gene)
         if not flip(self.crossover_rate):
             return ()
-        for i in range(self.days):
+        for i in range(self.length):
             if flip(self.crossover_parameter):
                 mother, father = father, mother
             for (md, fd, c1d, c2d) in zip(mother.gene.works_at(i),

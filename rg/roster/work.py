@@ -1,37 +1,27 @@
-
-
 class Work:
+    """class Work
+    You can set Work.work if it isn't locked.
+    It has properties work, locked, year, month, day and weekday.
+    """
     def __init__(self,
+                 date,
                  work="",
-                 locked=False,
-                 year=1970,
-                 month=1,
-                 day=1,
-                 weekday=3):
-        '''
-        >>> work = Work('日勤', True)
-        >>> work.work
-        '日勤'
-        >>> work.set_work('早番').work
-        '早番'
-        >>> work.locked
-        True
-        >>> work.set_locked(False).locked
-        False
-        '''
+                 locked=False):
         self._work = work
         self.locked = locked
-        self.year = year
-        self.month = month
-        self.day = day
-        self.weekday = weekday
+        self.year = date.year
+        self.month = date.month
+        self.day = date.day
+        self.weekday = date.weekday()
 
     @property
     def work(self):
+        """Get value of work."""
         return self._work
 
     @work.setter
     def work(self, work):
+        """Set value to work if it isn't locked."""
         if not self.locked:
             self._work = work
         else:

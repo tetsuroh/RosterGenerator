@@ -4,26 +4,16 @@ from rg.roster.shift import Shift
 
 
 class Roster(collections.MutableSequence):
-    def __init__(self, lastday, employees):
+    def __init__(self, sdate, length, employees):
         '''
-        >>> employees = []
-        >>> employees.append(Employee('Tom', 'Part', ["A", "B"]))
-        >>> employees.append(Employee('Mike', 'Part', ["A", "B", "C"]))
-        >>> roster = Roster(31, employees)
-        >>> roster[0][0].work
-        'A'
-        >>> roster2 = roster.clone()
-        >>> roster == roster2
-        False
-        >>> roster.employees[0] == roster2.employees[0]
-        True
+        sdate is a date object that is for to making roster.
         '''
         self.employees = employees
         self._roster = []
-        self.lastday = lastday
-        self.extend([])
+        self.sdate = sdate
+        self.length = length
         for e in employees:
-            self.append(Shift(lastday, e))
+            self.append(Shift(sdate, length, e))
 
     def __iter__(self):
         self.index = 0
@@ -62,7 +52,7 @@ class Roster(collections.MutableSequence):
             raise ValueError()
 
     def clone(self):
-        roster = Roster(self.lastday, self.employees)
+        roster = Roster(self.sdate, self.length, self.employees)
         for (cshift, pshift) in zip(roster, self):
             for (cday, pday) in zip(cshift, pshift):
                 cday.work = pday.work
