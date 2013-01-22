@@ -1,13 +1,17 @@
 import unittest
+import os
 
 # pyflakes.ignore
-from rg import Entity, GA, flip, rand, Work
+from rg import Entity, GA, flip, rand
 from rg import app
 
 
 class TestREntity(unittest.TestCase):
     def setUp(self):
-        self.rgapp = app.RGApp("./settings/test.json")
+        try:
+            self.rgapp = app.RGApp("./settings/test.json")
+        except:
+            print("********************************"+os.path.abspath('./'))
 
     def test_rentity_compare(self):
         e1 = self.rgapp.entities[0]
@@ -123,27 +127,6 @@ class test_util(unittest.TestCase):
         for i in range(100):
             self.assertTrue(5 <= rand(10, 5) < 10)
 
-
-class test_work(unittest.TestCase):
-    def setUp(self):
-        self.w = Work(2013, 2, 1)
-
-    def test_date(self):
-        self.assertEqual(self.w.year, 2013)
-        self.assertEqual(self.w.month, 2)
-        self.assertEqual(self.w.day, 1)
-        self.assertEqual(self.w.weekday, 4)
-
-    def test_locked(self):
-        def set_value2work():
-            self.w.work = 'B'
-        self.assertEqual(self.w.work, 'A')
-        self.assertEqual(self.w.locked, True)
-        self.assertRaises(PermissionError, set_value2work)
-        self.w.locked = False
-        self.w.work = 'B'
-        self.assertEqual(self.w.work, 'B')
-        self.assertEqual(self.w.locked, False)
 
 if __name__ == '__main__':
     unittest.main()
