@@ -1,7 +1,7 @@
 import unittest
 
 # pyflakes.ignore
-from rg import Entity, GA, flip, rand, Work, randomize
+from rg import Entity, GA, flip, rand, Work
 from rg import app
 
 
@@ -126,7 +126,7 @@ class test_util(unittest.TestCase):
 
 class test_work(unittest.TestCase):
     def setUp(self):
-        self.w = Work('A', True, 2013, 2, 1, 4)
+        self.w = Work(2013, 2, 1)
 
     def test_date(self):
         self.assertEqual(self.w.year, 2013)
