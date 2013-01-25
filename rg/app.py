@@ -16,7 +16,7 @@ from random import sample, shuffle
 import calendar
 from datetime import datetime, timedelta
 
-from rg import Roster, Entity, GA, Employee, Work, flip, rand
+from rg import Roster, Entity, GA, Employee, Work, flip, fold, rand
 from rg.util.settings import load
 
 
@@ -97,12 +97,13 @@ class REntity(Entity):
     def mutation(self):
         if not flip(self.mutation_rate):
             return
-        for shift in self.gene:
-            for day in shift:
-                if day.locked:
-                    pass
-                elif flip(self.mutation_parameter):
-                    day.work = sample(shift.employee.works, 1)[0]
+        for works in self.gene.works_on_days:
+            # TODO: Fix to reference allocatable_index before swap value.
+            """Take two elements from unlocked works list and swap them."""
+            if flip(self.mutation_parameter):
+                (a, b) = sample(list(filter(lambda w: not w.locked,
+                                            works)), 2)
+                a.work, b.work = b.work, a.work
 
 
 class RGApp(GA):
@@ -128,6 +129,14 @@ class RGApp(GA):
                                                    self.sdate.month)
         self.initialize_employees()
         self.initialize_population()
+        self.work_set_tree = {}
+        for w in sorted(set(fold((lambda x, y: x + y),
+                                 [self.settings['works'][key] for
+                                 key in self.settings['works']]))):
+            self.work_set_tree[w] = set()
+            for index, employee in enumerate(self.employees):
+                if w in employee.works:
+                    self.work_set_tree[w].add(index)
 
     def initialize_population(self):
         """ initialize population """
@@ -148,6 +157,10 @@ class RGApp(GA):
             self.employees.append(Employee(employee['name'],
                                            employee['status'],
                                            works[employee['status']]))
+
+    def allocatable_index(self, work):
+        """Get index possible to allocate the work."""
+        return self.work_set_tree[work]
 
     def crossover(self, mother, father):
         """ Do crossover onece. """
