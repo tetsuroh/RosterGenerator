@@ -10,10 +10,12 @@ def main():
     """
     start = time()
     rgapp = RGApp("./settings/sunhome_kitchen.json")
-    roster = rgapp.evolve_verbose().gene
-    with open("out.csv", mode="w", encoding="utf-8") as filep:
-        filep.write(convert(roster))
-    end = time()
+    try:
+        rgapp.evolve_verbose().gene
+    except KeyboardInterrupt:
+        with open("out.csv", mode="w", encoding="utf-8") as filep:
+            filep.write(convert(roster))
+            end = time()
     print("complete in %d seconds." % (end - start))
 
 if __name__ == '__main__':
