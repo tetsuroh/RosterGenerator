@@ -1,4 +1,8 @@
 {
+    "tr":{
+	"holiday": "休",
+	"paid_leave": "有"
+    },
     "GA": {
         "archive_size": 6, 
         "crossover_parameter": 0.5, 
@@ -18,23 +22,19 @@
     "conditions": [
         []
     ], 
-    "daily_shifts": {
-        "minimum_shifts": [
-            "A", 
-            "B", 
-            "2", 
-            "C"
-        ], 
-        "optional_shifts": [
-            "B", 
-            "休"
-        ]
-    }, 
     "date": {
         "day": 1, 
         "month": 2, 
         "year": 2013
     }, 
+    "default_work_set": [
+	[
+            "A", 
+            "B", 
+            "2", 
+            "C"
+	]
+    ], 
     "employees": [
         {
             "holiday": 8, 
@@ -59,17 +59,17 @@
         {
             "holiday": 15, 
             "name": "Eさん", 
-            "status": "パート"
+            "status": "パート1"
         }, 
         {
             "holiday": 15, 
             "name": "Fさん", 
-            "status": "パート"
+            "status": "パート2"
         }, 
         {
             "holiday": 15, 
             "name": "Gさん", 
-            "status": "パート"
+            "status": "パート2"
         }
     ], 
     "events": [], 
@@ -95,17 +95,17 @@
     ], 
     "length": null, 
     "works": {
-        "パート": [
-            "B", 
-            "2", 
-            "休"
+        "パート1": [
+            "2"
+        ], 
+        "パート2": [
+            "B"
         ], 
         "常勤": [
             "A", 
             "B", 
             "2", 
-            "C", 
-            "休"
+            "C"
         ]
     }
 }
