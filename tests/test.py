@@ -43,14 +43,11 @@ class TestREntity(unittest.TestCase):
                 c += 1 if w.work == v else 0
             return c
         r = self.rgapp.entities[0].gene
-        minimum_shifts = self.rgapp.settings['daily_shifts']['minimum_shifts']
-        minimum_set = set(minimum_shifts)
-        pads = self.rgapp.settings['daily_shifts']['optional_shifts']
-        pads_set = set(pads)
+        minimum_shifts = self.rgapp.settings['default_work_set']
         for works in r.works_on_days:
-            for w in minimum_set - pads_set:
-                self.assertEqual(minimum_shifts.count(w),
-                                 count(works, w))
+            for work in works:
+                self.assertEqual(minimum_shifts.count(work),
+                                 count(works, work))
             """
             for p in minimum_set & pads_set:
                 self.assertTrue(count(works, p) >= minimum_shifts.count(p))

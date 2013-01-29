@@ -16,7 +16,7 @@ from random import sample, shuffle
 import calendar
 from datetime import datetime, timedelta
 
-from rg import Roster, Entity, GA, Employee, Work, flip, fold, rand
+from rg import Roster, Entity, GA, Employee, Work, flip, fold
 from rg.util.settings import load
 
 
@@ -56,13 +56,22 @@ class REntity(Entity):
             else:
                 self.gene = gene
         else:
-            minimum_shifts = self.settings['daily_shifts']['minimum_shifts']
-            pads = self.settings['daily_shifts']['optional_shifts']
+            """ Initializing roster.
+            Make "daily_work_set" from 'default_work_set'
+            and append "holiday" to it until it is length
+            to be equal to number of employees.
+            """
+            # TODO: Add or reduce works by daily events in settings.
+            default_work_set = self.settings['default_work_set']
+            holiday = self.settings['tr']['holiday']
             # number of free position on day
-            padsize = len(self.gene.employees) - len(minimum_shifts)
+            holiday_size = len(self.gene.employees) - len(default_work_set)
+            # TODO: Change to assign works, referring to a work_set_tree.
+            # TODO: Change it to day of the week can be referred.
             for ws in self.gene.works_on_days:
-                daily_works = minimum_shifts + [pads[rand(len(pads))]
-                                                for _ in range(padsize)]
+                daily_works = default_work_set + [holiday
+                                                  for _
+                                                  in range(holiday_size)]
                 shuffle(daily_works)
                 for (w, dw) in zip(ws, daily_works):
                     w.work = dw
@@ -98,12 +107,16 @@ class REntity(Entity):
         if not flip(self.mutation_rate):
             return
         for works in self.gene.works_on_days:
-            # TODO: Fix to reference allocatable_index before swap value.
+            # TODO: Fix to refer assignable_index and then swap value.
             """Take two elements from unlocked works list and swap them."""
             if flip(self.mutation_parameter):
-                (a, b) = sample(list(filter(lambda w: not w.locked,
-                                            works)), 2)
-                a.work, b.work = b.work, a.work
+                assignable_positions = list(filter(lambda w: not w.locked,
+                                            works))
+                if len(assignable_positions) < 2:
+                    continue
+                else:
+                    (a, b) = sample(assignable_positions, 2)
+                    a.work, b.work = b.work, a.work
 
 
 class RGApp(GA):
@@ -158,9 +171,9 @@ class RGApp(GA):
                                            employee['status'],
                                            works[employee['status']]))
 
-    def allocatable_index(self, work):
-        """Get index possible to allocate the work."""
-        return self.work_set_tree[work]
+    def allocatable_index(self, work, allocated_index=[]):
+        """Get index possible to allocatethe work."""
+        return self.work_set_tree[work] - set(allocated_index)
 
     def crossover(self, mother, father):
         """ Do crossover onece. """
@@ -194,7 +207,8 @@ class RGApp(GA):
     def calc_fitness(self):
         """
         This method calculates fitness for every entities.
-        Stub.
+        TODO: Calculate fitness from conditions.
+        Conditions are readed from settings.json.
         """
         def countIf(xs, fn):
             cnt = 0
@@ -207,6 +221,8 @@ class RGApp(GA):
             fitness = 0
             for shift in e.gene:
                 #"""
+                if not shift.employee.status == '常勤':
+                    continue
                 working = 0
                 over_work = 0
                 for day in shift:
@@ -220,26 +236,14 @@ class RGApp(GA):
                 if leave != 8:
                     fitness += abs(leave - 8)
 
-            #"""
-            for i in range(len(shift)):
-                works = e.gene.works_at(i)
-                if countIf(works, lambda x: x.work == "A") != 1:
-                    fitness += 1
-                if countIf(works, lambda x: x.work == "C") != 1:
-                    fitness += 1
-                if countIf(works, lambda x: x.work == "B") >= 1:
-                    pass  # fitness += 1
-                if countIf(works, lambda x: x.work == "2") != 1:
-                    pass  # fitness += 1
-            #"""
             e.fitness = fitness
 
 
 def main():
     global rgapp
     rgapp = RGApp("./settings/test.json")
-    rgapp.evolve_verbose()
-    print(rgapp.entities[0].gene)
+    print(rgapp.evolve_verbose().gene)
+
 
 if __name__ == '__main__':
     main()
