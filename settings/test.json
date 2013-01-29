@@ -1,0 +1,111 @@
+{
+    "GA": {
+        "archive_size": 6, 
+        "crossover_parameter": 0.5, 
+        "crossover_rate": 0.8, 
+        "max_generation": 1000, 
+        "mutation_parameter": 0.05, 
+        "mutation_rate": 0.5, 
+        "population_size": 80, 
+        "tournament_size": 6
+    }, 
+    "chains": {
+        "常勤": [
+            "C", 
+            "A"
+        ]
+    }, 
+    "conditions": [
+        []
+    ], 
+    "daily_shifts": {
+        "minimum_shifts": [
+            "A", 
+            "B", 
+            "2", 
+            "C"
+        ], 
+        "optional_shifts": [
+            "B", 
+            "休"
+        ]
+    }, 
+    "date": {
+        "day": 1, 
+        "month": 2, 
+        "year": 2013
+    }, 
+    "employees": [
+        {
+            "holiday": 8, 
+            "name": "Aさん", 
+            "status": "常勤"
+        }, 
+        {
+            "holiday": 8, 
+            "name": "Bさん", 
+            "status": "常勤"
+        }, 
+        {
+            "holiday": 8, 
+            "name": "Cさん", 
+            "status": "常勤"
+        }, 
+        {
+            "holiday": 8, 
+            "name": "Dさん", 
+            "status": "常勤"
+        }, 
+        {
+            "holiday": 15, 
+            "name": "Eさん", 
+            "status": "パート"
+        }, 
+        {
+            "holiday": 15, 
+            "name": "Fさん", 
+            "status": "パート"
+        }, 
+        {
+            "holiday": 15, 
+            "name": "Gさん", 
+            "status": "パート"
+        }
+    ], 
+    "events": [], 
+    "last_month_data": [
+        [
+            "2", 
+            "休", 
+            "C", 
+            "A", 
+            "休", 
+            "休", 
+            "B"
+        ], 
+        [
+            "2", 
+            "休", 
+            "A", 
+            "C", 
+            "休", 
+            "休", 
+            "B"
+        ]
+    ], 
+    "length": null, 
+    "works": {
+        "パート": [
+            "B", 
+            "2", 
+            "休"
+        ], 
+        "常勤": [
+            "A", 
+            "B", 
+            "2", 
+            "C", 
+            "休"
+        ]
+    }
+}
