@@ -31,7 +31,7 @@ def main():
         print("Shift length is %d" % len(roster[0]))
         with open("out.csv", mode="w", encoding="utf-8") as filep:
             filep.write(csv.from_roster(roster,
-                                        drop=drop))
+                                        drop=0))
     end = time()
     print("complete in %d seconds." % (end - start))
 

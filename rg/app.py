@@ -12,7 +12,7 @@ __version__ = "%d.%d.%d" % (__major__, __minor__, __relase__)
 __date__ = "1 January 2013"
 __all__ = ["RGApp"]
 
-from random import sample, shuffle
+from random import sample
 import calendar
 from datetime import datetime, timedelta
 
@@ -25,29 +25,27 @@ class REntity(Entity):
     This class is subclass of Entity that used in
     genetic algorithm application.
     It's gene is a roster.
-    re = REntity(mRate,  # mutation rate. Chance of mutation
-                 mParam,  # mutation parameter. Chance of mutation every gene
-                 settings,
-                 employees)
-
     """
     def __init__(self,
-                 mRate,  # mutation rate. Chance of mutation
-                 mParam,  # mutation parameter. Chance of mutation gene
+                 mRate,      # Mutation rate. Chance of mutation
+                 mParam,     # Mutation parameter. Chance of mutation gene
                  settings,
                  employees,
-                 sdate,
-                 length,
-                 gene=[]):
+                 sdate,      # Start date of roster.
+                 length,     # Length of roster.
+                 gene=None):
         self.settings = settings
         self.sdate = sdate
         self.length = length
         self.offset = len(self.settings['last_month_data'])
+        self.employees = employees
+        self.sdate = sdate
+
         Entity.__init__(self,
                         Roster(self.sdate, self.length, employees),
                         mRate,
                         mParam)
-        self.employees = employees
+
         if gene:
             if hasattr(gene, "clone"):
                 self.gene = gene.clone()
@@ -55,28 +53,39 @@ class REntity(Entity):
                 self.gene = gene[:]
             else:
                 self.gene = gene
+
+    def initialize_roster(self, work_set_tree):
+        """ Initializing roster.
+        Make "daily_work_sets" from 'default_work_lists'
+        and append "holiday" to it until it is length
+        to be equal to number of employees.
+        """
+        if len(self.settings['default_work_lists']) == 1:
+            default_work_lists = [self.settings['default_work_lists'][0]
+                                  for _ in range(7)]
+        elif len(self.settings['default_work_lists']) == 7:
+            default_work_lists = self.settings['default_work_lists']
         else:
-            """ Initializing roster.
-            Make "daily_work_set" from 'default_work_set'
-            and append "holiday" to it until it is length
-            to be equal to number of employees.
-            """
+            raise SettingValueError(""" Length of default_work_lists
+        should be 1 or 7.""")
+
+        holiday = self.settings['tr']['holiday']
+        # TODO: Change to assign works, referring to a work_set_tree.
+        # TODO: Change it to day of the week can be referred.
+        weekday = self.sdate.weekday()
+        for ws in self.gene.works_on_days:
+            assigned = set()
             # TODO: Add or reduce works by daily events in settings.
-            default_work_set = self.settings['default_work_set']
-            holiday = self.settings['tr']['holiday']
-            # number of free position on day
-            holiday_size = len(self.gene.employees) - len(default_work_set)
-            # TODO: Change to assign works, referring to a work_set_tree.
-            # TODO: Change it to day of the week can be referred.
-            for ws in self.gene.works_on_days:
-                daily_works = default_work_set + [holiday
-                                                  for _
-                                                  in range(holiday_size)]
-                shuffle(daily_works)
-                for (w, dw) in zip(ws, daily_works):
-                    w.work = dw
-            if self.settings['last_month_data']:
-                self.append_last_month_data()
+            holiday_size = len(self.gene.employees) - \
+                len(default_work_lists[weekday])
+            daily_works = default_work_lists[weekday] + \
+                [holiday for _ in range(holiday_size)]
+            daily_works.sort(key=lambda x: len(work_set_tree[x]))
+            for dw in daily_works:
+                i = sample(work_set_tree[dw] - assigned, 1)[0]
+                ws[i].work = dw
+                assigned.add(i)
+            weekday = (weekday + 1) % 7
 
     def append_last_month_data(self):
         index = 0
@@ -141,8 +150,11 @@ class RGApp(GA):
             (_, self.length) = calendar.monthrange(self.sdate.year,
                                                    self.sdate.month)
         self.initialize_employees()
-        self.initialize_population()
+
         self.work_set_tree = {}
+        self.work_set_tree[self.settings['tr']['holiday']] = \
+            self.work_set_tree[self.settings['tr']['paid_leave']] = \
+            set([i for i, _ in enumerate(self.employees)])
         for w in sorted(set(fold((lambda x, y: x + y),
                                  [self.settings['works'][key] for
                                  key in self.settings['works']]))):
@@ -150,6 +162,8 @@ class RGApp(GA):
             for index, employee in enumerate(self.employees):
                 if w in employee.works:
                     self.work_set_tree[w].add(index)
+
+        self.initialize_population()
 
     def initialize_population(self):
         """ initialize population """
@@ -161,6 +175,7 @@ class RGApp(GA):
                               self.employees,
                               self.sdate,
                               self.length)
+            rentity.initialize_roster(self.work_set_tree)
             self.entities.append(rentity)
 
     def initialize_employees(self):
@@ -237,6 +252,19 @@ class RGApp(GA):
                     fitness += abs(leave - 8)
 
             e.fitness = fitness
+
+
+class SettingValueError:
+    def __init__(self, value="Invalid setting value."):
+        """
+        Arguments:
+        - `self`:
+        - `value`:
+        """
+        self.value = value
+
+    def __str__(self):
+        return self.value
 
 
 def main():
