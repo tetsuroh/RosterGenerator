@@ -43,7 +43,7 @@ class TestREntity(unittest.TestCase):
                 c += 1 if w.work == v else 0
             return c
         r = self.rgapp.entities[0].gene
-        minimum_shifts = self.rgapp.settings['default_work_set']
+        minimum_shifts = self.rgapp.settings['default_work_lists']
         for works in r.works_on_days:
             for work in works:
                 self.assertEqual(minimum_shifts.count(work),

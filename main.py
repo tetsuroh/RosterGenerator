@@ -1,4 +1,4 @@
-from rg.util import csv
+from rg.util import tsv
 from rg.app import RGApp
 
 from time import time
@@ -29,8 +29,8 @@ def main():
     finally:
         roster = rgapp.best_entity.gene
         print("Shift length is %d" % len(roster[0]))
-        with open("out.csv", mode="w", encoding="utf-8") as filep:
-            filep.write(csv.from_roster(roster,
+        with open("out/out.tsv", mode="w", encoding="utf-8") as filep:
+            filep.write(tsv.from_roster(roster,
                                         drop=0))
     end = time()
     print("complete in %d seconds." % (end - start))

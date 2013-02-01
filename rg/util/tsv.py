@@ -1,6 +1,6 @@
 __all__ = ['from_roster']
 
-SEP = ","
+SEP = "\t"
 
 
 def from_roster(roster,
@@ -14,4 +14,6 @@ def from_roster(roster,
         for work in shift[drop:]:
             csv += "%s%s" % (work.work, SEP)
         csv += "\n"
+    csv += "\n"
+    csv += "\n".join(["\t\t=COUNTIF(C1:AD1, \"休\")" for _ in range(4)])
     return csv
