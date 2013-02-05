@@ -12,7 +12,7 @@ __version__ = "%d.%d.%d" % (__major__, __minor__, __relase__)
 __date__ = "1 January 2013"
 __all__ = ["RGApp"]
 
-from random import sample
+from random import sample, choice
 import calendar
 from datetime import datetime, timedelta
 
@@ -70,8 +70,6 @@ class REntity(Entity):
         should be 1 or 7.""")
 
         holiday = self.settings['tr']['holiday']
-        # TODO: Change to assign works, referring to a work_set_tree.
-        # TODO: Change it to day of the week can be referred.
         weekday = self.sdate.weekday()
         for ws in self.gene.works_on_days:
             assigned = set()
@@ -86,17 +84,6 @@ class REntity(Entity):
                 ws[i].work = dw
                 assigned.add(i)
             weekday = (weekday + 1) % 7
-
-    def append_last_month_data(self):
-        index = 0
-        date = datetime(self.settings['date']['year'],
-                        self.settings['date']['month'],
-                        self.settings['date']['day'])
-        for ws in self.settings['last_month_data']:
-            this_date = date - timedelta(days=(self.offset - index))
-            for (w, s) in zip(ws, self.gene):
-                s.insert(index, Work(this_date, w, True))
-            index += 1
 
     def clone(self):
         e = REntity(self.mutation_rate,
@@ -113,19 +100,25 @@ class REntity(Entity):
         return self.fitness == 0
 
     def mutation(self):
+        work_set_tree = self.settings['work_set_tree']
+
         if not flip(self.mutation_rate):
             return
         for works in self.gene.works_on_days:
             # TODO: Fix to refer assignable_index and then swap value.
             """Take two elements from unlocked works list and swap them."""
-            if flip(self.mutation_parameter):
-                assignable_positions = list(filter(lambda w: not w.locked,
-                                            works))
-                if len(assignable_positions) < 2:
-                    continue
-                else:
-                    (a, b) = sample(assignable_positions, 2)
-                    a.work, b.work = b.work, a.work
+            unlocked_positions = [i for i, d in enumerate(works) if
+                                  not d.locked]
+            if len(unlocked_positions) > 1 and flip(self.mutation_parameter):
+                a = choice(unlocked_positions)
+                work = works[a].work
+                assignable = set([i for i, d in enumerate(works) if
+                                  d.work in self.employees[a].works])
+                assignable_positions = list(work_set_tree[work] &
+                                            assignable - set([a]))
+                if assignable_positions:
+                    b = choice(assignable_positions)
+                    works[a].work, works[b].work = works[b].work, works[a].work
 
 
 class RGApp(GA):
@@ -152,6 +145,7 @@ class RGApp(GA):
         self.initialize_employees()
 
         self.work_set_tree = {}
+        self.settings['work_set_tree'] = self.work_set_tree
         self.work_set_tree[self.settings['tr']['holiday']] = \
             self.work_set_tree[self.settings['tr']['paid_leave']] = \
             set([i for i, _ in enumerate(self.employees)])
@@ -181,12 +175,15 @@ class RGApp(GA):
     def initialize_employees(self):
         works = self.settings['works']
         self.employees = []
+        leaves = [self.settings['tr']['holiday'],
+                  self.settings['tr']['paid_leave']]
         for employee in self.settings['employees']:
             self.employees.append(Employee(employee['name'],
                                            employee['status'],
-                                           works[employee['status']]))
+                                           works[employee['status']] +
+                                           leaves))
 
-    def allocatable_index(self, work, allocated_index=[]):
+    def assignable_index(self, work, allocated_index=[]):
         """Get index possible to allocatethe work."""
         return self.work_set_tree[work] - set(allocated_index)
 

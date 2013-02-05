@@ -60,12 +60,8 @@ class TestREntity(unittest.TestCase):
         - `self`:
         """
         e = self.rgapp.entities[0]
-        r = []
-        for shift in e.gene:
-            s = []
-            for day in shift:
-                s.append(day.work)
-            r.append(s)
+        r = e.gene.clone()
+
         e.mutation_rate = 1
         e.mutation_parameter = 0.5
         e.mutation()
@@ -73,7 +69,7 @@ class TestREntity(unittest.TestCase):
         diff = 0
         for (es, rs) in zip(e.gene, r):
             for (ed, rd) in zip(es, rs):
-                if ed.work == rd:
+                if ed.work == rd.work:
                     same += 1
                 else:
                     diff += 1
