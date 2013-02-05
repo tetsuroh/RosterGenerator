@@ -76,7 +76,7 @@ class REntity(Entity):
         weekday = self.sdate.weekday()
         for ws in self.gene.works_on_days:
             assigned = set()
-            # TODO: Add or reduce works by daily events in settings.
+            # TODO: Assign works by daily events in settings.
             holiday_size = len(self.gene.employees) - \
                 len(default_work_lists[weekday])
             daily_works = default_work_lists[weekday] + \
@@ -103,25 +103,37 @@ class REntity(Entity):
         return self.fitness == 0
 
     def mutation(self):
-        work_set_tree = self.settings['work_set_tree']
-
+        """ Take two elements from unlocked works list and swap them."""
         if not flip(self.mutation_rate):
             return
         for works in self.gene.works_on_days:
-            # TODO: Fix to refer assignable_index and then swap value.
-            """Take two elements from unlocked works list and swap them."""
             unlocked_positions = [i for i, d in enumerate(works) if
                                   not d.locked]
             if len(unlocked_positions) > 1 and flip(self.mutation_parameter):
                 a = choice(unlocked_positions)
-                work = works[a].work
-                assignable = set([i for i, d in enumerate(works) if
-                                  d.work in self.employees[a].works])
-                assignable_positions = list(work_set_tree[work] &
-                                            assignable - set([a]))
-                if assignable_positions:
-                    b = choice(assignable_positions)
-                    works[a].work, works[b].work = works[b].work, works[a].work
+                b = self.assignable_index(works, a)
+                if b == -1:
+                    continue
+                works[a].work, works[b].work = works[b].work, works[a].work
+
+    def assignable_index(self, works, a):
+        """
+        This function returns the index which can assign  works[a].work.
+        Arguments:
+        - `self`: self
+        - `works`: works of the day
+        - `i`: selected index
+        """
+        work_set_tree = self.settings['work_set_tree']
+        work = works[a].work
+        assignable = set([i for i, d in enumerate(works) if
+                          d.work in self.employees[a].works])
+        assignable_positions = list(work_set_tree[work] &
+                                    assignable - set([a]))
+        if assignable_positions:
+            return choice(assignable_positions)
+        else:
+            return -1
 
 
 class RGApp(GA):
@@ -253,7 +265,7 @@ class RGApp(GA):
             e.fitness = fitness
 
 
-class SettingValueError:
+class SettingValueError(ValueError):
     def __init__(self, value="Invalid setting value."):
         """
         Arguments:
@@ -264,6 +276,11 @@ class SettingValueError:
 
     def __str__(self):
         return self.value
+
+
+class AssginException:
+    def __init__(self, value="Can not assgin work any where."):
+        self.value = value
 
 
 def main():
