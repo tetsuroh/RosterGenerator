@@ -14,9 +14,9 @@ __all__ = ["RGApp"]
 
 from random import sample, choice
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from rg import Roster, Entity, GA, Employee, Work, flip, fold
+from rg import Roster, Entity, GA, Employee, flip, fold
 from rg.util.settings import load
 
 
@@ -53,13 +53,16 @@ class REntity(Entity):
                 self.gene = gene[:]
             else:
                 self.gene = gene
+        else:
+            self.initialize_roster()
 
-    def initialize_roster(self, work_set_tree):
+    def initialize_roster(self):
         """ Initializing roster.
         Make "daily_work_sets" from 'default_work_lists'
         and append "holiday" to it until it is length
         to be equal to number of employees.
         """
+        work_set_tree = self.settings['work_set_tree']
         if len(self.settings['default_work_lists']) == 1:
             default_work_lists = [self.settings['default_work_lists'][0]
                                   for _ in range(7)]
@@ -169,7 +172,6 @@ class RGApp(GA):
                               self.employees,
                               self.sdate,
                               self.length)
-            rentity.initialize_roster(self.work_set_tree)
             self.entities.append(rentity)
 
     def initialize_employees(self):
