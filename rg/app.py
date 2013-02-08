@@ -227,7 +227,10 @@ class RGApp(GA):
                                           child1.gene.works_at(i),
                                           child2.gene.works_at(i)):
                 c1d.work = md.work
+                c1d.locked = md.locked
+
                 c2d.work = fd.work
+                c2d.locked = fd.locked
         return (child1, child2)
 
     def calc_fitness(self):
