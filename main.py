@@ -29,9 +29,18 @@ def main():
     finally:
         roster = rgapp.best_entity.gene
         print("Shift length is %d" % len(roster[0]))
+        tsv_string = tsv.from_roster(roster)
+        tsv_string += "\n\n\t\t休\tA\tB\t2\tC\n"
+        tsv_string += "\n".join(["\t=A{0}\t=COUNTIF(C{0}:AG{0}, \"休\")"
+                                 "\t=COUNTIF(C{0}:AG{0}, \"A\")"
+                                 "\t=COUNTIF(C{0}:AG{0}, \"B\")"
+                                 "\t=COUNTIF(C{0}:AG{0}, \"2\")"
+                                 "\t=COUNTIF(C{0}:AG{0}, \"C\")"
+                                 .format(i)
+                                 for i in range(1, 5)])
+
         with open("out/out.tsv", mode="w", encoding="utf-8") as filep:
-            filep.write(tsv.from_roster(roster,
-                                        drop=0))
+            filep.write(tsv_string)
     end = time()
     print("complete in %d seconds." % (end - start))
 
