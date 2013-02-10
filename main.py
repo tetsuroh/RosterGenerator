@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from rg import convert
-=======
 from rg.util import tsv
->>>>>>> develop
 from rg.app import RGApp
 
 from time import time
