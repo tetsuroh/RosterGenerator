@@ -50,6 +50,23 @@ class Entity:
     def __ge__(self, o):
         return self.fitness >= o.fitness
 
+    def clone(self):
+        """
+        This method is make clone of self.
+        Not copy, do clone.
+        Because, copied entity changes　unintentionally
+        when original entity is mutation.
+        Don't forget copy entity's fitness :)
+
+        This method is virtual function.
+        Please override in subclass.
+        """
+        e = Entity(self.gene,
+                   self.mutation_rate,
+                   self.mutation_parameter)
+        e.fitness = self.fitness
+        return e
+
     def is_perfect(self):
         """
         This method examines whether or not this entity is perfect.
@@ -117,7 +134,8 @@ class GA:
         self.tournament_size = tSize
 
         self.entities = []
-        self.next_generation = []
+        self.best_entity = None
+        self.next_generations = []
         self.generation = 0
         self.log = []
 
@@ -130,7 +148,7 @@ class GA:
         You append to your entities to self.entities, and
         then initialize entities.
         """
-        GENOM_LEN = 38
+        GENOM_LEN = 64
 
         def random_gene(length):
             gene = []
@@ -188,7 +206,7 @@ class GA:
 
         Best entities so far.
         """
-        self.next_generation = self.entities[:self.archive_size]
+        self.next_generations = self.entities[:self.archive_size]
 
     def perform_crossover(self):
         """
@@ -198,8 +216,8 @@ class GA:
             children = None
             while not children:
                 children = self.crossover(*self.tournament_selection())
-            self.next_generation.append(children[0])
-            self.next_generation.append(children[1])
+            self.next_generations.append(children[0])
+            self.next_generations.append(children[1])
 
     def perform_mutation(self):
         """
@@ -237,17 +255,28 @@ class GA:
                     sort([e for e in es if e >= head])
         self.entities = sort(self.entities)
 
+    def save_best_entity(self):
+        if (
+                self.best_entity and
+                self.best_entity.fitness <=
+                self.entities[0].fitness
+        ):
+            return
+        else:
+            self.best_entity = self.entities[0].clone()
+
     def evolution_step(self):
         """
         Perform single evolution step.
         """
-        self.next_generation = []
+        self.save_best_entity()
+        self.next_generations = []
         self.generation += 1
 
         self.perform_archive()
         self.perform_crossover()
         # Alternations to the next generation.
-        self.entities = self.next_generation
+        self.entities = self.next_generations
         self.perform_mutation()
 
     def evolve(self, verbosely=False):
@@ -256,9 +285,9 @@ class GA:
         Do the evolution until find perfect entity or
         reach max generations limit.
         """
+        self.calc_fitness()
+        self.sort_entities()
         while self.generation < self.max_generations:
-            self.calc_fitness()
-            self.sort_entities()
             if (self.entities[0].is_perfect()):
                 print("Perfect entity, found.")
                 break
@@ -266,11 +295,16 @@ class GA:
                 if verbosely:
                     print("Generation: %d Fitness: %d" %
                           (self.generation,
+                           self.best_entity.fitness if
+                           self.best_entity else
                            self.entities[0].fitness))
                 self.evolution_step()
+            self.calc_fitness()
+            self.sort_entities()
         self.calc_fitness()
         self.sort_entities()
-        return self.entities[0]
+        self.save_best_entity()
+        return self.best_entity
 
     def evolve_verbose(self):
         """

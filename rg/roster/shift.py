@@ -1,10 +1,11 @@
 import collections
+from datetime import timedelta
 
 from rg.roster.work import Work
 
 
 class Shift(collections.MutableSequence):
-    def __init__(self, lastday, employee):
+    def __init__(self, sdate, length, employee):
         '''
         >>> from employee import Employee
         >>> shift = Shift(30)
@@ -18,15 +19,15 @@ class Shift(collections.MutableSequence):
         'tom'
         '''
         self._shift = []
-        self.lastday = lastday
+        self.length = length
         work = ''
         if len(employee.works):
             work = employee.works[0]
-        for i in range(self.lastday):
-            self._shift.append(Work(work))
+        for i in range(self.length):
+            self._shift.append(Work(sdate + timedelta(days=i),
+                                    work))
 
         self.employee = employee
-        self.extend(list(self._shift))
 
     def __len__(self):
         return len(self._shift)
