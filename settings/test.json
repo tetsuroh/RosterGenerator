@@ -1,8 +1,4 @@
 {
-    "tr":{
-	"holiday": "休",
-	"paid_leave": "有"
-    },
     "GA": {
         "archive_size": 6, 
         "crossover_parameter": 0.5, 
@@ -13,14 +9,14 @@
         "population_size": 80, 
         "tournament_size": 6
     }, 
-    "chains": {
-        "常勤": [
+    "conditions": [
+        []
+    ], 
+    "continuous_work": [
+        [
             "C", 
             "A"
         ]
-    }, 
-    "conditions": [
-        []
     ], 
     "date": {
         "day": 1, 
@@ -28,12 +24,12 @@
         "year": 2013
     }, 
     "default_work_lists": [
-	[
+        [
             "A", 
             "B", 
             "2", 
             "C"
-	]
+        ]
     ], 
     "employees": [
         {
@@ -77,15 +73,6 @@
         [
             "2", 
             "休", 
-            "C", 
-            "A", 
-            "休", 
-            "休", 
-            "B"
-        ], 
-        [
-            "2", 
-            "休", 
             "A", 
             "C", 
             "休", 
@@ -94,6 +81,11 @@
         ]
     ], 
     "length": null, 
+    "tr": {
+        "holiday": "休", 
+        "paid_leave": "有"
+    }, 
+    "uncontinuous_work": {}, 
     "works": {
         "パート1": [
             "2"

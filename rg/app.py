@@ -14,10 +14,12 @@ __all__ = ["RGApp"]
 
 from random import sample, choice
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import reduce as fold
 
-from rg import Roster, Entity, GA, Employee, flip, fold
+from rg import Roster, Entity, GA, Employee, flip, Work
 from rg.util.settings import load
+from rg.util.list import index
 
 
 class REntity(Entity):
@@ -76,7 +78,7 @@ class REntity(Entity):
         weekday = self.sdate.weekday()
         for ws in self.gene.works_on_days:
             assigned = set()
-            # TODO: Assign works by daily events in settings.
+            # TODO: Preassign works from daily events in settings.
             holiday_size = len(self.gene.employees) - \
                 len(default_work_lists[weekday])
             daily_works = default_work_lists[weekday] + \
@@ -115,6 +117,59 @@ class REntity(Entity):
                 if b == -1:
                     continue
                 works[a].work, works[b].work = works[b].work, works[a].work
+
+    def apply_continuous_work(self):
+        """
+        apply_continuous_work :: Int -- fitness
+        This method applies continuous works.
+        For instance, it is assumed that if you work on night shift,
+         the next day is a holiday.
+        """
+        def w_swap(x, y):
+            x.work, y.work = y.work, x.work
+
+        def apply(continuous_work, works, works_on_days, i):
+            fitness = 0
+            if i >= len(works_on_days) - 1:
+                return fitness
+
+            for j, cw in enumerate(continuous_work[:-1]):
+                if not fold(lambda x, y: x or y,
+                            [w.work == cw for w in works]):
+                    return fitness
+
+                indexes_a = [i for i, w in enumerate(works) if
+                             w.work == cw]
+                indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
+                             w.work == continuous_work[j+1] and
+                             not w.locked]
+
+                if len(indexes_a) > len(indexes_b):
+                    fitness += len(indexes_a) - len(indexes_b)
+                for a, b in zip(indexes_a, indexes_b):
+                    w_swap(works_on_days[i+1][a],
+                           works_on_days[i+1][b])
+            return fitness
+
+        if not self.settings['continuous_work']:
+            return
+        elif not self.settings['last_month_data'] or \
+            not fold(lambda x, y: x and y,
+                     [len(self.employees) == len(works)
+                      for works in self.settings['last_month_data']]):
+            raise SettingValueError("""Invalid setting file for
+        apply continuous work.""")
+        else:
+            continuous_works = self.settings['continuous_work']
+
+        fitness = 0
+        wods = self.settings['last_month_data'] + \
+            self.gene.works_on_days
+        for i, works in enumerate(wods):
+            for cw in continuous_works:
+                fitness = apply(cw, works, wods, i)
+
+        return fitness
 
     def assignable_index(self, works, a):
         """
@@ -158,21 +213,34 @@ class RGApp(GA):
             (_, self.length) = calendar.monthrange(self.sdate.year,
                                                    self.sdate.month)
         self.initialize_employees()
+        self.initialize_settings()
+        self.initialize_population()
 
+    def initialize_settings(self):
         self.work_set_tree = {}
         self.settings['work_set_tree'] = self.work_set_tree
         self.work_set_tree[self.settings['tr']['holiday']] = \
             self.work_set_tree[self.settings['tr']['paid_leave']] = \
             set([i for i, _ in enumerate(self.employees)])
-        for w in sorted(set(fold((lambda x, y: x + y),
+        for w in sorted(set(fold(lambda x, y: x + y,
                                  [self.settings['works'][key] for
                                  key in self.settings['works']]))):
             self.work_set_tree[w] = set()
-            for index, employee in enumerate(self.employees):
+            for idx, employee in enumerate(self.employees):
                 if w in employee.works:
-                    self.work_set_tree[w].add(index)
+                    self.work_set_tree[w].add(idx)
 
-        self.initialize_population()
+        if 'continuous_work' in self.settings:
+            if not 'last_month_data' in self.settings:
+                raise SettingValueError("""last_month_data is required
+            when apply continuous work""")
+            days = len(self.settings['last_month_data'])
+            lmd = []
+            for i, d in enumerate(self.settings['last_month_data']):
+                lmd.append([Work(self.sdate-timedelta(days=days-i),
+                                 w,
+                                 True) for w in d])
+            self.settings['last_month_data'] = lmd
 
     def initialize_population(self):
         """ initialize population """
@@ -196,10 +264,6 @@ class RGApp(GA):
                                            employee['status'],
                                            works[employee['status']] +
                                            leaves))
-
-    def assignable_index(self, work, allocated_index=[]):
-        """Get index possible to allocatethe work."""
-        return self.work_set_tree[work] - set(allocated_index)
 
     def crossover(self, mother, father):
         """ Do crossover onece. """
@@ -236,8 +300,7 @@ class RGApp(GA):
     def calc_fitness(self):
         """
         This method calculates fitness for every entities.
-        TODO: Calculate fitness from conditions.
-        Conditions are readed from settings.json.
+        TODO: Calculate fitness by conditions from settings.
         """
         def countIf(xs, fn):
             cnt = 0
@@ -247,6 +310,7 @@ class RGApp(GA):
             return cnt
 
         for e in self.entities:
+            e.apply_continuous_work()
             fitness = 0
             for shift in e.gene:
                 #"""
