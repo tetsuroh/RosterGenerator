@@ -24,7 +24,7 @@ def main(date, out, extension, template, setting_filename):
             num = input("Please input selected file number >> ")
             if re.match('^\d+$', num) and \
                     0 < int(num) <= len(setting_files):
-                setting_filename = setting_files[num-1]
+                setting_filename = setting_files[int(num)-1]
                 break
     settings = get_settings("./settings/"+setting_filename, date)
     start = time()
