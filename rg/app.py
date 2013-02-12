@@ -19,7 +19,6 @@ from functools import reduce as fold
 
 from rg import Roster, Entity, GA, Employee, flip, Work
 from rg.util.settings import load
-from rg.util.list import index
 
 
 class REntity(Entity):
@@ -192,8 +191,15 @@ class REntity(Entity):
 
 
 class RGApp(GA):
-    def __init__(self, filename):
-        self.settings = load(filename)
+    def __init__(self, filename=None, settings=None):
+        if filename:
+            self.settings = load(filename)
+        elif settings:
+            self.settings = settings
+        else:  # otherwise
+            raise Exception("""Wrong argments.
+                            Either filename or settings is indispensable.""")
+
         GA.__init__(self,
                     self.settings['GA']['population_size'],
                     self.settings['GA']['archive_size'],

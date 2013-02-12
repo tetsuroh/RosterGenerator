@@ -8,6 +8,6 @@ def load(filename, encoding="utf-8"):
         return json.load(fp)
 
 
-def save(obj, filenmae, encoding="utf-8"):
+def save(obj, filename, encoding="utf-8"):
     with open(filename, "w", encoding=encoding) as fp:
         fp.write(json.dumps(obj, indent=2, ensure_ascii=False))
