@@ -15,6 +15,7 @@ __all__ = ["Entity", "GA"]
 from rg.util.flip import flip
 
 from random import sample
+import sys
 
 
 class Entity:
@@ -148,7 +149,7 @@ class GA:
         You append to your entities to self.entities, and
         then initialize entities.
         """
-        GENOM_LEN = 64
+        GENOM_LEN = 264
 
         def random_gene(length):
             gene = []
@@ -279,6 +280,11 @@ class GA:
         self.entities = self.next_generations
         self.perform_mutation()
 
+    @staticmethod
+    def update_progress(s):
+        sys.stdout.write(s+"\r")
+        sys.stdout.flush()
+
     def evolve(self, verbosely=False):
         """
         evolve :: Boolean -> Entity
@@ -293,11 +299,11 @@ class GA:
                 break
             else:
                 if verbosely:
-                    print("Generation: %d Fitness: %d" %
-                          (self.generation,
-                           self.best_entity.fitness if
-                           self.best_entity else
-                           self.entities[0].fitness))
+                    GA.update_progress("Generation: %d Fitness: %d" %
+                                       (self.generation,
+                                        self.best_entity.fitness if
+                                        self.best_entity else
+                                        self.entities[0].fitness))
                 self.evolution_step()
             self.calc_fitness()
             self.sort_entities()
