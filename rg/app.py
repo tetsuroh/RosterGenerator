@@ -15,7 +15,7 @@ __all__ = ["RGApp"]
 from random import sample, choice
 import calendar
 from datetime import datetime, timedelta
-from functools import reduce as fold
+from functools import reduce
 
 from rg import Roster, Entity, GA, Employee, flip, Work
 from rg.util.settings import load
@@ -138,8 +138,8 @@ class REntity(Entity):
                 return fitness
 
             for j, cw in enumerate(consecutive_work[:-1]):
-                if not fold(lambda x, y: x or y,
-                            [w.work == cw for w in works]):
+                if not reduce(lambda x, y: x or y,
+                              [w.work == cw for w in works]):
                     return fitness
 
                 indexes_a = [i for i, w in enumerate(works) if
@@ -158,9 +158,9 @@ class REntity(Entity):
         if not self.settings['consecutive_work']:
             return
         elif not self.settings['last_month_data'] or \
-            not fold(lambda x, y: x and y,
-                     [len(self.employees) == len(works)
-                      for works in self.settings['last_month_data']]):
+            not reduce(lambda x, y: x and y,
+                       [len(self.employees) == len(works)
+                        for works in self.settings['last_month_data']]):
             raise SettingValueError("""Invalid setting file for
         apply consecutive work.""")
         else:
@@ -176,6 +176,7 @@ class REntity(Entity):
 
     def check_consecutive_work(self):
         countIf = lambda xs, fn: len([x for x in xs if fn(x)])
+        isOverWork = lambda x: x > self.settings['maximum_consecutive_work']
         fitness = 0
         for shift in self.gene:
             #"""
@@ -188,7 +189,7 @@ class REntity(Entity):
                     working = 0
                 else:  # When the day isnt holiday or paid leave
                     working += 1
-                    over_work += 1 if working > 5 else 0
+                    over_work += 1 if isOverWork(working) else 0
             fitness += over_work
             leave = countIf(shift, lambda x: x.work == "休")
             if leave != 8:
@@ -248,14 +249,15 @@ class RGApp(GA):
         self.initialize_population()
 
     def initialize_settings(self):
+        self.tr = self.settings['tr']
         self.work_set_tree = {}
         self.settings['work_set_tree'] = self.work_set_tree
         self.work_set_tree[self.settings['tr']['holiday']] = \
             self.work_set_tree[self.settings['tr']['paid_leave']] = \
             set([i for i, _ in enumerate(self.employees)])
-        for w in sorted(set(fold(lambda x, y: x + y,
-                                 [self.settings['works'][key] for
-                                 key in self.settings['works']]))):
+        for w in sorted(set(reduce(lambda x, y: x + y,
+                                   [self.settings['works'][key] for
+                                    key in self.settings['works']]))):
             self.work_set_tree[w] = set()
             for idx, employee in enumerate(self.employees):
                 if w in employee.works:
