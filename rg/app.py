@@ -30,7 +30,7 @@ class REntity(Entity):
     def __init__(self,
                  mRate,      # Mutation rate. Chance of mutation
                  mParam,     # Mutation parameter. Chance of mutation gene
-                 settings,
+                 settings,   # setting object
                  employees,
                  sdate,      # Start date of roster.
                  length,     # Length of roster.
@@ -47,6 +47,7 @@ class REntity(Entity):
                         mRate,
                         mParam)
 
+        # If gene is exists then copy them.
         if gene:
             if hasattr(gene, "clone"):
                 self.gene = gene.clone()
@@ -104,7 +105,10 @@ class REntity(Entity):
         return self.fitness == 0
 
     def mutation(self):
-        """ Take two elements from unlocked works list and swap them."""
+        """ Take two unlocked shifts from works list and swap them.
+        [(A, locked), (B, unlocked), (C, unlocked)] ->
+        [(A, locked), (C, unlocked), (B, aunlocked)]
+        """
         if not flip(self.mutation_rate):
             return
         for works in self.gene.works_on_days:
@@ -117,22 +121,23 @@ class REntity(Entity):
                     continue
                 works[a].work, works[b].work = works[b].work, works[a].work
 
-    def apply_continuous_work(self):
+    def apply_consecutive_work(self):
         """
-        apply_continuous_work :: Int -- fitness
-        This method applies continuous works.
+        apply_consecutive_work :: Int -- fitness
+        This method applies consecutive works.
         For instance, it is assumed that if you work on night shift,
-         the next day is a holiday.
+        the next day is a holiday.
         """
         def w_swap(x, y):
+            """ Swap work between x and y. """
             x.work, y.work = y.work, x.work
 
-        def apply(continuous_work, works, works_on_days, i):
+        def apply(consecutive_work, works, works_on_days, i):
             fitness = 0
             if i >= len(works_on_days) - 1:
                 return fitness
 
-            for j, cw in enumerate(continuous_work[:-1]):
+            for j, cw in enumerate(consecutive_work[:-1]):
                 if not fold(lambda x, y: x or y,
                             [w.work == cw for w in works]):
                     return fitness
@@ -140,7 +145,7 @@ class REntity(Entity):
                 indexes_a = [i for i, w in enumerate(works) if
                              w.work == cw]
                 indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
-                             w.work == continuous_work[j+1] and
+                             w.work == consecutive_work[j+1] and
                              not w.locked]
 
                 if len(indexes_a) > len(indexes_b):
@@ -150,24 +155,44 @@ class REntity(Entity):
                            works_on_days[i+1][b])
             return fitness
 
-        if not self.settings['continuous_work']:
+        if not self.settings['consecutive_work']:
             return
         elif not self.settings['last_month_data'] or \
             not fold(lambda x, y: x and y,
                      [len(self.employees) == len(works)
                       for works in self.settings['last_month_data']]):
             raise SettingValueError("""Invalid setting file for
-        apply continuous work.""")
+        apply consecutive work.""")
         else:
-            continuous_works = self.settings['continuous_work']
+            consecutive_works = self.settings['consecutive_work']
 
         fitness = 0
-        wods = self.settings['last_month_data'] + \
-            self.gene.works_on_days
+        wods = self.settings['last_month_data'] + self.gene.works_on_days
         for i, works in enumerate(wods):
-            for cw in continuous_works:
+            for cw in consecutive_works:
                 fitness = apply(cw, works, wods, i)
 
+        return fitness
+
+    def check_consecutive_work(self):
+        countIf = lambda xs, fn: len([x for x in xs if fn(x)])
+        fitness = 0
+        for shift in self.gene:
+            #"""
+            if not shift.employee.status == '常勤':
+                continue
+            working = 0
+            over_work = 0
+            for day in shift:
+                if day.work == "休" or day.work == "有":
+                    working = 0
+                else:  # When the day isnt holiday or paid leave
+                    working += 1
+                    over_work += 1 if working > 5 else 0
+            fitness += over_work
+            leave = countIf(shift, lambda x: x.work == "休")
+            if leave != 8:
+                fitness += abs(leave - 8)
         return fitness
 
     def assignable_index(self, works, a):
@@ -191,9 +216,9 @@ class REntity(Entity):
 
 
 class RGApp(GA):
-    def __init__(self, filename=None, settings=None):
-        if filename:
-            self.settings = load(filename)
+    def __init__(self, settings):
+        if type(settings) == str:
+            self.settings = load(settings)
         elif settings:
             self.settings = settings
         else:  # otherwise
@@ -236,10 +261,10 @@ class RGApp(GA):
                 if w in employee.works:
                     self.work_set_tree[w].add(idx)
 
-        if 'continuous_work' in self.settings:
+        if 'consecutive_work' in self.settings:
             if not 'last_month_data' in self.settings:
                 raise SettingValueError("""last_month_data is required
-            when apply continuous work""")
+            when apply consecutive work""")
             days = len(self.settings['last_month_data'])
             lmd = []
             for i, d in enumerate(self.settings['last_month_data']):
@@ -305,35 +330,13 @@ class RGApp(GA):
 
     def calc_fitness(self):
         """
-        This method calculates fitness for every entities.
+        This method calculates fitness for every entity.
         TODO: Calculate fitness by conditions from settings.
         """
-        def countIf(xs, fn):
-            cnt = 0
-            for x in xs:
-                if fn(x):
-                    cnt += 1
-            return cnt
-
         for e in self.entities:
-            e.apply_continuous_work()
             fitness = 0
-            for shift in e.gene:
-                #"""
-                if not shift.employee.status == '常勤':
-                    continue
-                working = 0
-                over_work = 0
-                for day in shift:
-                    if day.work == "休" or day.work == "有":
-                        working = 0
-                    else:  # When the day isnt holiday or paid leave
-                        working += 1
-                        over_work += 1 if working > 5 else 0
-                fitness += over_work
-                leave = countIf(shift, lambda x: x.work == "休")
-                if leave != 8:
-                    fitness += abs(leave - 8)
+            fitness += e.apply_consecutive_work()
+            fitness += e.check_consecutive_work()
 
             e.fitness = fitness
 
