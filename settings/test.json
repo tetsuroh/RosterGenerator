@@ -1,104 +1,104 @@
 {
-    "GA": {
-        "archive_size": 6, 
-        "crossover_parameter": 0.5, 
-        "crossover_rate": 0.9, 
-        "max_generation": 100, 
-        "mutation_parameter": 0.2, 
-        "mutation_rate": 0.5, 
-        "population_size": 60, 
-        "tournament_size": 8
+  "events": [], 
+  "maximum_consecutive_work": 4, 
+  "date": {
+    "month": 7, 
+    "day": 1, 
+    "year": 2013
+  }, 
+  "works": {
+    "常勤": [
+      "A", 
+      "B", 
+      "2", 
+      "C"
+    ], 
+    "パート2": [
+      "B"
+    ], 
+    "パート1": [
+      "2"
+    ]
+  }, 
+  "GA": {
+    "max_generation": 200, 
+    "tournament_size": 10, 
+    "crossover_parameter": 0.5, 
+    "mutation_rate": 0.4, 
+    "archive_size": 12, 
+    "mutation_parameter": 0.1, 
+    "crossover_rate": 0.9, 
+    "population_size": 100
+  }, 
+  "last_month_data": [
+    [
+      "2", 
+      "休", 
+      "A", 
+      "C", 
+      "休", 
+      "休", 
+      "B"
+    ]
+  ], 
+  "tr": {
+    "paid_leave": "有", 
+    "holiday": "休"
+  }, 
+  "default_work_lists": [
+    [
+      "A", 
+      "B", 
+      "2", 
+      "C"
+    ]
+  ], 
+  "employees": [
+    {
+      "status": "常勤", 
+      "holiday": 8, 
+      "name": "Aさん"
     }, 
-    "conditions": [
-        []
-    ], 
-    "consecutive_work": [
-        [
-            "C", 
-            "A"
-        ]
-    ], 
-    "date": {
-        "day": 1, 
-        "month": 7, 
-        "year": 2013
+    {
+      "status": "常勤", 
+      "holiday": 8, 
+      "name": "Bさん"
     }, 
-    "default_work_lists": [
-        [
-            "A", 
-            "B", 
-            "2", 
-            "C"
-        ]
-    ], 
-    "employees": [
-        {
-            "holiday": 8, 
-            "name": "Aさん", 
-            "status": "常勤"
-        }, 
-        {
-            "holiday": 8, 
-            "name": "Bさん", 
-            "status": "常勤"
-        }, 
-        {
-            "holiday": 8, 
-            "name": "Cさん", 
-            "status": "常勤"
-        }, 
-        {
-            "holiday": 8, 
-            "name": "Dさん", 
-            "status": "常勤"
-        }, 
-        {
-            "holiday": 15, 
-            "name": "Eさん", 
-            "status": "パート1"
-        }, 
-        {
-            "holiday": 15, 
-            "name": "Fさん", 
-            "status": "パート2"
-        }, 
-        {
-            "holiday": 15, 
-            "name": "Gさん", 
-            "status": "パート2"
-        }
-    ], 
-    "events": [], 
-    "last_month_data": [
-        [
-            "2", 
-            "休", 
-            "A", 
-            "C", 
-            "休", 
-            "休", 
-            "B"
-        ]
-    ], 
-    "length": null, 
-    "maximum_consecutive_work": 4, 
-    "tr": {
-        "holiday": "休", 
-        "paid_leave": "有"
+    {
+      "status": "常勤", 
+      "holiday": 8, 
+      "name": "Cさん"
     }, 
-    "unconsecutive_work": {}, 
-    "works": {
-        "パート1": [
-            "2"
-        ], 
-        "パート2": [
-            "B"
-        ], 
-        "常勤": [
-            "A", 
-            "B", 
-            "2", 
-            "C"
-        ]
+    {
+      "status": "常勤", 
+      "holiday": 8, 
+      "name": "Dさん"
+    }, 
+    {
+      "status": "パート1", 
+      "holiday": null, 
+      "name": "Eさん"
+    }, 
+    {
+      "status": "パート2", 
+      "holiday": null, 
+      "name": "Fさん"
+    }, 
+    {
+      "status": "パート2", 
+      "holiday": null, 
+      "name": "Gさん"
     }
+  ], 
+  "consecutive_work": [
+    [
+      "C", 
+      "A"
+    ]
+  ], 
+  "conditions": [
+    []
+  ], 
+  "unconsecutive_work": {}, 
+  "length": null
 }

@@ -179,21 +179,24 @@ class REntity(Entity):
         isOverWork = lambda x: x > self.settings['maximum_consecutive_work']
         fitness = 0
         for shift in self.gene:
-            #"""
-            if not shift.employee.status == '常勤':
-                continue
+            employee = shift.employee
             working = 0
             over_work = 0
             for day in shift:
-                if day.work == "休" or day.work == "有":
+                if (
+                        day.work == self.settings['tr']['holiday'] or
+                        day.work == self.settings['tr']['paid_leave']
+                ):
                     working = 0
-                else:  # When the day isnt holiday or paid leave
+                else:  # When the day isn't holiday or paid leave
                     working += 1
                     over_work += 1 if isOverWork(working) else 0
             fitness += over_work
-            leave = countIf(shift, lambda x: x.work == "休")
-            if leave != 8:
-                fitness += abs(leave - 8)
+            leave = countIf(shift,
+                            lambda x: x.work == self.settings['tr']['holiday'])
+            if employee.workdays_in_month:
+                if leave != employee.workdays_in_month:
+                    fitness += abs(leave - employee.workdays_in_month)
         return fitness
 
     def assignable_index(self, works, a):
@@ -293,10 +296,13 @@ class RGApp(GA):
         leaves = [self.settings['tr']['holiday'],
                   self.settings['tr']['paid_leave']]
         for employee in self.settings['employees']:
-            self.employees.append(Employee(employee['name'],
-                                           employee['status'],
-                                           works[employee['status']] +
-                                           leaves))
+            e = Employee(employee['name'],
+                         employee['status'],
+                         works[employee['status']] +
+                         leaves)
+            if employee['holiday']:
+                e.set_workdays_in_month(employee['holiday'])
+            self.employees.append(e)
 
     def crossover(self, mother, father):
         """ Do crossover onece. """
