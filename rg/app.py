@@ -127,33 +127,6 @@ class REntity(Entity):
         For instance, it is assumed that if you work on night shift,
         the next day is a holiday.
         """
-        def w_swap(x, y):
-            """ Swap work between x and y. """
-            x.work, y.work = y.work, x.work
-
-        def apply(consecutive_work, works, works_on_days, i):
-            fitness = 0
-            if i >= len(works_on_days) - 1:
-                return fitness
-
-            for j, cw in enumerate(consecutive_work[:-1]):
-                if not reduce(lambda x, y: x or y,
-                              [w.work == cw for w in works]):
-                    return fitness
-
-                indexes_a = [i for i, w in enumerate(works) if
-                             w.work == cw]
-                indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
-                             w.work == consecutive_work[j+1] and
-                             not w.locked]
-
-                if len(indexes_a) > len(indexes_b):
-                    fitness += len(indexes_a) - len(indexes_b)
-                for a, b in zip(indexes_a, indexes_b):
-                    w_swap(works_on_days[i+1][a],
-                           works_on_days[i+1][b])
-            return fitness
-
         if not self.settings['consecutive_work']:
             return
         elif not self.settings['last_month_data'] or \
@@ -169,8 +142,38 @@ class REntity(Entity):
         wods = self.settings['last_month_data'] + self.gene.works_on_days
         for i, works in enumerate(wods):
             for cw in consecutive_works:
-                fitness = apply(cw, works, wods, i)
+                fitness = self._apply_consecutive_work(cw, works, wods, i)
 
+        return fitness
+
+    def _swap_work(self, a, b):
+        a.work, b.work = b.work, a.work
+
+    def _apply_consecutive_work(self,
+                                consecutive_work,
+                                works,
+                                works_on_days,
+                                i):
+        fitness = 0
+        if i >= len(works_on_days) - 1:
+            return fitness
+
+        for j, cw in enumerate(consecutive_work[:-1]):
+            if not reduce(lambda x, y: x or y,
+                          [w.work == cw for w in works]):
+                return fitness
+
+            indexes_a = [i for i, w in enumerate(works) if
+                         w.work == cw]
+            indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
+                         w.work == consecutive_work[j+1] and
+                         not w.locked]
+
+            if len(indexes_a) > len(indexes_b):
+                fitness += len(indexes_a) - len(indexes_b)
+            for a, b in zip(indexes_a, indexes_b):
+                self._swap_work(works_on_days[i+1][a],
+                                works_on_days[i+1][b])
         return fitness
 
     def check_consecutive_work(self):
