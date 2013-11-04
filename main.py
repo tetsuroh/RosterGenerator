@@ -30,7 +30,6 @@ def main(date, out, extension, template, setting_filename):
     start = time()
     rgapp = RGApp("./settings/%s" %
                   setting_filename)
-    drop = len(rgapp.settings['last_month_data'])
     try:
         rgapp.evolve_verbose()
     except KeyboardInterrupt:

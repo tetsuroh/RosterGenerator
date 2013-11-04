@@ -38,7 +38,6 @@ class REntity(Entity):
         self.settings = settings
         self.sdate = sdate
         self.length = length
-        self.offset = len(self.settings['last_month_data'])
         self.employees = employees
         self.sdate = sdate
 
