@@ -127,8 +127,9 @@ class REntity(Entity):
         For instance, it is assumed that if you work on night shift,
         the next day is a holiday.
         """
+        fitness = 0
         if not self.settings['consecutive_work']:
-            return
+            return fitness
         elif not self.settings['last_month_data'] or \
             not reduce(lambda x, y: x and y,
                        [len(self.employees) == len(works)
@@ -138,12 +139,12 @@ class REntity(Entity):
         else:
             consecutive_works = self.settings['consecutive_work']
 
-        fitness = 0
-        wods = self.settings['last_month_data'] + self.gene.works_on_days
+        last_month_data_len = len(self.settings['consecutive_work']) - 1
+        wods = self.settings['last_month_data'][-last_month_data_len:] +\
+            self.gene.works_on_days
         for i, works in enumerate(wods):
             for cw in consecutive_works:
-                fitness = self._apply_consecutive_work(cw, works, wods, i)
-
+                fitness += self._apply_consecutive_work(cw, works, wods, i)
         return fitness
 
     def _swap_work(self, a, b):
@@ -169,11 +170,11 @@ class REntity(Entity):
                          w.work == consecutive_work[j+1] and
                          not w.locked]
 
-            if len(indexes_a) > len(indexes_b):
-                fitness += len(indexes_a) - len(indexes_b)
-            for a, b in zip(indexes_a, indexes_b):
-                self._swap_work(works_on_days[i+1][a],
-                                works_on_days[i+1][b])
+            if not indexes_a == indexes_b:
+                fitness = abs(len(indexes_a) - len(indexes_b))
+                for a, b in zip(indexes_a, indexes_b):
+                    self._swap_work(works_on_days[i+1][a],
+                                    works_on_days[i+1][b])
         return fitness
 
     def check_consecutive_work(self):

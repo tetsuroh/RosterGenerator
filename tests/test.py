@@ -13,6 +13,19 @@ class TestREntity(unittest.TestCase):
         except:
             print("********************************"+os.path.abspath('./'))
 
+    def test_consecutive_work(self):
+        e = self.rgapp.entities[0]
+        self.assertEqual(e.apply_consecutive_work(), 0)
+        cws = self.rgapp.settings['consecutive_work']
+        for cw in cws:
+            for shift in e.gene:
+                idx = 0
+                while shift[idx:]:
+                    if shift[idx].work == cw[0]:
+                        self.assertTrue(all([c == s.work for (c, s) in
+                                             zip(cw, shift[idx:])]))
+                    idx += 1
+
     def test_rentity_compare(self):
         e1 = self.rgapp.entities[0]
         e2 = self.rgapp.entities[1]
