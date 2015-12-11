@@ -20,7 +20,7 @@ import sys
 
 class Entity:
     """
-    Entity for Genetic Algorithm Application.
+    進化させる個体
     """
     def __init__(self,
                  gene,
@@ -53,14 +53,8 @@ class Entity:
 
     def clone(self):
         """
-        This method is make clone of self.
-        Not copy, do clone.
-        Because, copied entity changes　unintentionally
-        when original entity is mutation.
-        Don't forget copy entity's fitness :)
-
-        This method is virtual function.
-        Please override in subclass.
+        この個体自身のクローンを返す
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         e = Entity(self.gene,
                    self.mutation_rate,
@@ -70,19 +64,15 @@ class Entity:
 
     def is_perfect(self):
         """
-        This method examines whether or not this entity is perfect.
-
-        This method is virtual function
-        Please override in subclass
+        この個体が完璧かどうかを返す
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         return self.fitness == 0
 
     def mutation(self):
         """
-        This method is to mutate the entity
-
-        This method is virtual function
-        Please override in subclass
+        突然変異させる
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         if not flip(self.mutation_rate):
             return
@@ -101,8 +91,9 @@ class Entity:
     @fitness.setter
     def fitness(self, fitness):
         """
-        Please override this method if you calculate
-        fitness from any conditions.
+        この個体の適合率を示す
+        適合率を計算する必要がある場合は
+        このメソッドをサブクラスでoverrideする
         """
         self._fitness = fitness
 
@@ -142,12 +133,10 @@ class GA:
 
     def initialize_population(self):
         """
-        This method is virtual function.
-        Please override in subclass.
+        Populationを初期化する
+        self.entitiesに個体を追加する
 
-        Initialize population in this function.
-        You append to your entities to self.entities, and
-        then initialize entities.
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         GENOM_LEN = 264
 
@@ -165,10 +154,6 @@ class GA:
         self.answer = random_gene(GENOM_LEN)
 
     def tournament_selection(self):
-        '''
-        Select father and mother.
-        self.entities have to sorted by own fitness.
-        '''
         indexes = list(range(self.population_size))
         selections = sample(indexes, self.tournament_size)
         selections.sort()
@@ -180,12 +165,9 @@ class GA:
 
     def crossover(self, mother, father):
         """
-        This method is virtual function.
-        Please override in subclass.
+        交叉を行う
 
-        This function does not always perform crossover.
-        If perform crossover, this function returns a (Entity, Entity).
-        Otherwise it returns empty pair ().
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         child1 = Entity([], self.mutation_rate, self.mutation_parameter)
         child2 = Entity([], self.mutation_rate, self.mutation_parameter)
@@ -203,15 +185,13 @@ class GA:
 
     def perform_archive(self):
         """
-        self.entities have to sorted by own fitness.
-
-        Best entities so far.
+        現世代の優秀な個体をそのまま次世代に残す
         """
         self.next_generations = self.entities[:self.archive_size]
 
     def perform_crossover(self):
         """
-        Perform crossover to every entities.
+        それぞれの個体に交叉を実行する
         """
         for _ in range(int((self.population_size - self.archive_size) / 2)):
             children = None
@@ -222,7 +202,7 @@ class GA:
 
     def perform_mutation(self):
         """
-        Perform mutation to every entities.
+        それぞれの個体にランダムに突然変異を実行する
         """
         if not flip(self.mutation_rate):
             return
@@ -231,9 +211,8 @@ class GA:
 
     def calc_fitness(self):
         """
-        This method calculates fitness for every entities.
-        This method is virtual function.
-        Please override in subclass.
+        それぞれの個体の適合率を計算する
+        このメソッドはサブクラスでoverrideすることを想定している
         """
         for e in self.entities:
             fitness = 0
@@ -243,10 +222,6 @@ class GA:
             e.fitness = fitness
 
     def sort_entities(self):
-        """
-        Sort entities.
-        self.entities needs Entity#__lt__, Entity#__ge__ methods.
-        """
         def sort(es):
             if not es:
                 return []
@@ -268,7 +243,7 @@ class GA:
 
     def evolution_step(self):
         """
-        Perform single evolution step.
+        ひと世代分の進化
         """
         self.save_best_entity()
         self.next_generations = []
@@ -276,7 +251,7 @@ class GA:
 
         self.perform_archive()
         self.perform_crossover()
-        # Alternations to the next generation.
+
         self.entities = self.next_generations
         self.perform_mutation()
 
@@ -286,11 +261,6 @@ class GA:
         sys.stdout.flush()
 
     def evolve(self, verbosely=False):
-        """
-        evolve :: Boolean -> Entity
-        Do the evolution until find perfect entity or
-        reach max generations limit.
-        """
         self.calc_fitness()
         self.sort_entities()
         while self.generation < self.max_generations:
@@ -313,10 +283,6 @@ class GA:
         return self.best_entity
 
     def evolve_verbose(self):
-        """
-        evolve_verbose :: Entity
-        Do the evolution, verbosely.
-        """
         return self.evolve(verbosely=True)
 
 if __name__ == '__main__':

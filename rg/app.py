@@ -23,9 +23,7 @@ from rg.util.settings import load
 
 class REntity(Entity):
     """
-    This class is subclass of Entity that used in
-    genetic algorithm application.
-    It's gene is a roster.
+    一つの勤務表を表すクラス
     """
     def __init__(self,
                  mRate,      # Mutation rate. Chance of mutation
@@ -57,11 +55,17 @@ class REntity(Entity):
         else:
             self.initialize_roster()
 
+    def score(self):
+        f = self.apply_consecutive_work()
+        f += self.check_consecutive_work()
+        self.fitness = f
+        return f
+            
     def initialize_roster(self):
-        """ Initializing roster.
-        Make "daily_work_sets" from 'default_work_lists'
-        and append "holiday" to it until it is length
-        to be equal to number of employees.
+        """ 
+        ランダムな勤務表を生成する
+        その曜日に必要なシフトをランダムに割り当てる
+        残りは休みで埋める
         """
         work_set_tree = self.settings['work_set_tree']
         if len(self.settings['default_work_lists']) == 1:
@@ -77,7 +81,7 @@ class REntity(Entity):
         weekday = self.sdate.weekday()
         for ws in self.gene.works_on_days:
             assigned = set()
-            # TODO: Preassign works from daily events in settings.
+
             holiday_size = len(self.gene.employees) - \
                 len(default_work_lists[weekday])
             daily_works = default_work_lists[weekday] + \
@@ -104,9 +108,8 @@ class REntity(Entity):
         return self.fitness == 0
 
     def mutation(self):
-        """ Take two unlocked shifts from works list and swap them.
-        [(A, locked), (B, unlocked), (C, unlocked)] ->
-        [(A, locked), (C, unlocked), (B, aunlocked)]
+        """
+        突然変異として、固定されていなシフトが二つ以上あった場合これを交換する
         """
         if not flip(self.mutation_rate):
             return
@@ -122,40 +125,16 @@ class REntity(Entity):
 
     def apply_consecutive_work(self):
         """
-        apply_consecutive_work :: Int -- fitness
-        This method applies consecutive works.
-        For instance, it is assumed that if you work on night shift,
-        the next day is a holiday.
+        連続勤務を適用する
+        返り値のfitnessは0に近いほど適合率が高い
+        fitness適用できなかった場合に増える
+
+        連続勤務とは、夜勤の入りと明けなどの日をまたぐ
+        シフトのこと
         """
-        def w_swap(x, y):
-            """ Swap work between x and y. """
-            x.work, y.work = y.work, x.work
-
-        def apply(consecutive_work, works, works_on_days, i):
-            fitness = 0
-            if i >= len(works_on_days) - 1:
-                return fitness
-
-            for j, cw in enumerate(consecutive_work[:-1]):
-                if not reduce(lambda x, y: x or y,
-                              [w.work == cw for w in works]):
-                    return fitness
-
-                indexes_a = [i for i, w in enumerate(works) if
-                             w.work == cw]
-                indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
-                             w.work == consecutive_work[j+1] and
-                             not w.locked]
-
-                if len(indexes_a) > len(indexes_b):
-                    fitness += len(indexes_a) - len(indexes_b)
-                for a, b in zip(indexes_a, indexes_b):
-                    w_swap(works_on_days[i+1][a],
-                           works_on_days[i+1][b])
-            return fitness
-
+        fitness = 0
         if not self.settings['consecutive_work']:
-            return
+            return fitness
         elif not self.settings['last_month_data'] or \
             not reduce(lambda x, y: x and y,
                        [len(self.employees) == len(works)
@@ -165,12 +144,42 @@ class REntity(Entity):
         else:
             consecutive_works = self.settings['consecutive_work']
 
-        fitness = 0
-        wods = self.settings['last_month_data'] + self.gene.works_on_days
+        last_month_data_len = len(self.settings['consecutive_work']) - 1
+        wods = self.settings['last_month_data'][-last_month_data_len:] +\
+            self.gene.works_on_days
         for i, works in enumerate(wods):
             for cw in consecutive_works:
-                fitness = apply(cw, works, wods, i)
+                fitness += self._apply_consecutive_work(cw, works, wods, i)
+        return fitness
 
+    def _swap_work(self, a, b):
+        a.work, b.work = b.work, a.work
+
+    def _apply_consecutive_work(self,
+                                consecutive_work,
+                                works,
+                                works_on_days,
+                                i):
+        fitness = 0
+        if i >= len(works_on_days) - 1:
+            return fitness
+
+        for j, cw in enumerate(consecutive_work[:-1]):
+            if not reduce(lambda x, y: x or y,
+                          [w.work == cw for w in works]):
+                return fitness
+
+            indexes_a = [i for i, w in enumerate(works) if
+                         w.work == cw]
+            indexes_b = [i for i, w in enumerate(works_on_days[i+1]) if
+                         w.work == consecutive_work[j+1] and
+                         not w.locked]
+
+            if not indexes_a == indexes_b:
+                fitness = abs(len(indexes_a) - len(indexes_b))
+                for a, b in zip(indexes_a, indexes_b):
+                    self._swap_work(works_on_days[i+1][a],
+                                    works_on_days[i+1][b])
         return fitness
 
     def check_consecutive_work(self):
@@ -200,11 +209,7 @@ class REntity(Entity):
 
     def assignable_index(self, works, a):
         """
-        This function returns the index which can assign  works[a].work.
-        Arguments:
-        - `self`: self
-        - `works`: works of the day
-        - `i`: selected index
+        あるシフトを割り当てられる人のインデックスをランダムで返す
         """
         work_set_tree = self.settings['work_set_tree']
         work = works[a].work
@@ -341,12 +346,7 @@ class RGApp(GA):
         TODO: Calculate fitness by conditions from settings.
         """
         for e in self.entities:
-            fitness = 0
-            fitness += e.apply_consecutive_work()
-            fitness += e.check_consecutive_work()
-
-            e.fitness = fitness
-
+            e.score()
 
 class SettingValueError(ValueError):
     def __init__(self, value="Invalid setting value."):
